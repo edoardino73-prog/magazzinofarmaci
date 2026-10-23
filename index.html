@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Magazzino farmaci RSA</title>
+<style>
+:root{--bg:#eef2f4;--card:#fff;--ink:#14272f;--mut:#5b6b74;--line:#dbe3e7;--side:#0f2a33;--sideink:#c7dae0;--acc:#12809a;--acc2:#e1f2f6;--ok:#2a7a4b;--warn:#9a5f00;--bad:#b3261e;--badbg:#fbe9e7;--warnbg:#fff1cf;--r:10px}
+@media(prefers-color-scheme:dark){:root{--bg:#0c1519;--card:#152228;--ink:#e6eef2;--mut:#9db0ba;--line:#26373f;--side:#08181e;--sideink:#a9c0c8;--acc:#3fb2d1;--acc2:#143542;--ok:#6cc08b;--warn:#e8b04a;--bad:#ff8a80;--badbg:#3a1f1c;--warnbg:#3a2f14}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;grid-template-columns:230px 1fr;grid-template-rows:auto 1fr;min-height:100vh}
+nav{grid-column:1;grid-row:1/3;background:var(--side);padding:20px 12px;display:flex;flex-direction:column;gap:4px}
+.brand{padding:4px 12px 18px;color:#fff;display:flex;flex-direction:column}.brand b{font-size:17px}.brand span{font-size:12px;color:var(--sideink)}
+nav button{text-align:left;border:0;background:none;color:var(--sideink);padding:10px 12px;border-radius:8px;font:inherit;cursor:pointer}
+nav button:hover{background:rgba(255,255,255,.07)}nav button.on{background:var(--acc);color:#fff;font-weight:600}
+header{grid-column:2;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;padding:20px 28px 14px}
+h1{font-size:24px;margin:0;font-weight:650;letter-spacing:-.01em}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+main{grid-column:2;padding:0 28px 28px;max-width:1150px;width:100%}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+label{display:block;font-size:13px;color:var(--mut);margin-bottom:3px}
+input,select,button,textarea{font:inherit;color:inherit}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.scan{font-size:18px;padding:14px;border:2px dashed var(--acc);background:var(--acc2)}
+.btn{padding:9px 16px;border:1px solid var(--acc);background:var(--acc);color:#fff;border-radius:8px;cursor:pointer;font-weight:600}
+.btn.sec{background:var(--card);color:var(--acc)}
+.chk{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--ink)}.chk input{width:auto}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mut);font-weight:600;font-size:13px;background:var(--bg)}
+tr:hover td{background:var(--acc2)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:2px 9px;border-radius:10px;font-size:12px;font-weight:600}
+.t-ok{background:var(--acc2);color:var(--ok)}.t-w{background:var(--warnbg);color:var(--warn)}.t-b{background:var(--badbg);color:var(--bad)}
+.pill{padding:5px 11px;border-radius:14px;font-size:13px;font-weight:600;background:var(--line);color:var(--mut)}
+.pill.ok{background:var(--acc2);color:var(--ok)}.pill.w{background:var(--warnbg);color:var(--warn)}.pill.b{background:var(--badbg);color:var(--bad)}
+.msg{padding:10px 12px;border-radius:8px;margin:10px 0;font-size:14px}
+.msg.ok{background:var(--acc2);color:var(--ok)}.msg.err{background:var(--badbg);color:var(--bad)}.msg.w{background:var(--warnbg);color:var(--warn)}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:16px}
+.k{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:var(--r);padding:14px 16px}
+.k.w{border-left-color:var(--warn)}.k.b{border-left-color:var(--bad)}
+.k span{display:block;font-size:13px;color:var(--mut)}.k b{font-size:30px;font-weight:650;font-variant-numeric:tabular-nums}
+.empty{color:var(--mut);padding:18px 0}
+h2{font-size:16px;margin:0 0 12px}
+.hint{font-size:13px;color:var(--mut);margin-top:6px}
+textarea{width:100%;font:13px ui-monospace,Consolas,monospace;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+dialog{border:1px solid var(--line);border-radius:14px;padding:22px;max-width:580px;width:92%;background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+@media(max-width:800px){body{grid-template-columns:1fr}nav{grid-column:1;grid-row:auto;flex-direction:row;flex-wrap:wrap;padding:10px}.brand{display:none}header,main{grid-column:1;padding-left:14px;padding-right:14px}}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="pt">Giacenze</h1>
+  <div class="bar">
+    <span class="pill" id="cst">Solo su questo computer</span>
+    <button class="btn sec" id="bCloud">Archivio cloud</button>
+    <div><label for="op">Operatore</label><input id="op" placeholder="Nome e cognome"></div>
+    <button class="btn sec" id="bExp">Salva backup</button>
+    <button class="btn sec" id="bImp">Carica backup</button>
+    <input type="file" id="fImp" accept=".json" hidden>
+  </div>
+</header>
+<nav id="nav">
+  <div class="brand"><b>Magazzino farmaci</b><span>RSA · carico e scarico</span></div>
+  <button data-t="giacenze" class="on">Giacenze</button>
+  <button data-t="carico">Carico</button>
+  <button data-t="scarico">Scarico</button>
+  <button data-t="anagrafica">Anagrafica farmaci</button>
+  <button data-t="movimenti">Registro movimenti</button>
+</nav>
+<main>
+<section id="giacenze" class="on">
+  <div class="kpi" id="kpi"></div>
+  <div id="alerts"></div>
+  <div class="card"><h2>Giacenze per lotto</h2><div class="tw" id="gTab"></div></div>
+</section>
+
+<section id="carico">
+  <div class="card">
+    <h2>Carico in magazzino</h2>
+    <label for="cScan">Scansiona la confezione</label>
+    <input id="cScan" class="scan" autocomplete="off" placeholder="Clicca qui e usa il lettore (Data Matrix o codice a barre)">
+    <div id="cMsg"></div>
+    <div class="grid" style="margin-top:12px">
+      <div><label for="cF">Farmaco</label><select id="cF"></select></div>
+      <div><label for="cL">Lotto</label><input id="cL"></div>
+      <div><label for="cS">Scadenza</label><input id="cS" type="date"></div>
+      <div><label for="cQ">Quantità (confezioni)</label><input id="cQ" type="number" min="1" step="1"></div>
+      <div><label for="cD">Documento (DDT/fattura) e fornitore</label><input id="cD"></div>
+    </div>
+    <p><button class="btn" id="cOk">Registra carico</button></p>
+  </div>
+</section>
+
+<section id="scarico">
+  <div class="card">
+    <h2>Scarico dal magazzino</h2>
+    <label for="sScan">Scansiona la confezione</label>
+    <input id="sScan" class="scan" autocomplete="off" placeholder="Clicca qui e usa il lettore">
+    <div id="sMsg"></div>
+    <div class="grid" style="margin-top:12px">
+      <div><label for="sF">Farmaco</label><select id="sF"></select></div>
+      <div><label for="sL">Lotto (prima scadenza in cima)</label><select id="sL"></select></div>
+      <div><label for="sQ">Quantità (confezioni)</label><input id="sQ" type="number" min="1" step="1" value="1"></div>
+      <div><label for="sM">Motivo</label><select id="sM"><option>Somministrazione</option><option>Reso al fornitore</option><option>Scarto: scaduto</option><option>Scarto: altro</option><option>Rettifica inventario</option></select></div>
+      <div><label for="sD">Ospite / reparto (obbligatorio per stupefacenti)</label><input id="sD"></div>
+    </div>
+    <p><button class="btn" id="sOk">Registra scarico</button></p>
+  </div>
+</section>
+
+<section id="anagrafica">
+  <div class="card">
+    <h2>Nuovo farmaco</h2>
+    <div class="grid">
+      <div><label for="aA">Codice AIC</label><input id="aA" inputmode="numeric"></div>
+      <div><label for="aG">GTIN / codice a barre (facoltativo)</label><input id="aG" inputmode="numeric"></div>
+      <div><label for="aN">Denominazione e dosaggio</label><input id="aN"></div>
+      <div><label for="aP">Principio attivo</label><input id="aP"></div>
+      <div><label for="aFo">Forma</label><input id="aFo" placeholder="cpr, fl, cerotto…"></div>
+      <div><label for="aM">Scorta minima</label><input id="aM" type="number" min="0" value="0"></div>
+    </div>
+    <p style="display:flex;gap:18px;flex-wrap:wrap">
+      <label class="chk"><input type="checkbox" id="aS"> Stupefacente</label>
+      <label class="chk"><input type="checkbox" id="aFr"> Frigorifero</label>
+      <label class="chk"><input type="checkbox" id="aR"> Alto rischio / LASA</label>
+    </p>
+    <div id="aMsg"></div>
+    <p><button class="btn" id="aOk">Aggiungi farmaco</button></p>
+  </div>
+  <div class="card">
+    <h2>Importa elenco farmaci (CSV)</h2>
+    <p class="hint">File con riga di intestazione e colonne: <b>aic;gtin;nome;principio;forma</b> (separatore ; o ,). Puoi preparare il file partendo dagli elenchi pubblicati da AIFA.</p>
+    <input type="file" id="aCsv" accept=".csv,.txt">
+  </div>
+  <div class="card"><h2>Elenco farmaci</h2><div class="tw" id="aTab"></div></div>
+</section>
+
+<section id="movimenti">
+  <div class="card">
+    <div class="bar" style="justify-content:space-between">
+      <h2>Registro movimenti</h2>
+      <div class="bar"><select id="mF" style="width:auto"></select><button class="btn sec" id="mCsv">Esporta CSV</button></div>
+    </div>
+    <p class="hint">I movimenti non si cancellano: un errore si corregge con un movimento di segno opposto.</p>
+    <div class="tw" id="mTab"></div>
+  </div>
+</section>
+</main>
+
+<dialog id="dlg">
+  <h2>Archivio cloud (Firebase)</h2>
+  <p class="hint">Copia e incolla qui la configurazione web del tuo progetto Firebase (Impostazioni progetto → Le tue app → Configurazione SDK), poi accedi con un utente creato in Firebase Authentication.</p>
+  <label for="fbCfg">Configurazione Firebase</label>
+  <textarea id="fbCfg" rows="7" placeholder='apiKey: "…", authDomain: "…", projectId: "…", appId: "…"'></textarea>
+  <div class="grid" style="margin-top:10px">
+    <div><label for="fbE">Email</label><input id="fbE" type="email" autocomplete="username"></div>
+    <div><label for="fbP">Password</label><input id="fbP" type="password" autocomplete="current-password"></div>
+  </div>
+  <div id="fbMsg"></div>
+  <div class="bar" style="margin-top:12px"><button class="btn" id="fbGo">Collega e accedi</button><button class="btn sec" id="fbOut">Scollega</button><button class="btn sec" id="fbClose">Chiudi</button></div>
+</dialog>
+
+<script>
+const $=id=>document.getElementById(id);
+const K='rsa_farmaci_v1';
+let db={farmaci:[],mov:[],op:''};
+try{const r=localStorage.getItem(K);if(r)db=JSON.parse(r)}catch(e){}
+function save(){try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}if(window.cloudPush)window.cloudPush()}
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const today=()=>new Date().toISOString().slice(0,10);
+const fmt=d=>d?d.split('-').reverse().join('/'):'';
+const fd=id=>db.farmaci.find(f=>f.id===id);
+function msg(el,t,c){$(el).innerHTML=t?'<div class="msg '+c+'">'+esc(t)+'</div>':''}
+
+/* Lettura codici: GS1 Data Matrix (01 GTIN, 17 scadenza, 10 lotto, 21 seriale) o codice semplice */
+function parseScan(raw){
+  let s=raw.trim(),o={code:s};
+  if(s.includes('(')){s=s.replace(/\((\d+)\)/g,(m,a)=>a+'\x1d')}
+  if(!/^01\d{14}/.test(s))return o;
+  o.code=s.slice(2,16);let i=16;
+  while(i<s.length){
+    const ai=s.slice(i,i+2);
+    if(ai==='17'||ai==='11'||ai==='15'){const v=s.slice(i+2,i+8);if(ai==='17')o.scad=ymd(v);i+=8}
+    else if(ai==='10'||ai==='21'){let e=s.indexOf('\x1d',i+2);if(e<0)e=s.length;o[ai==='10'?'lotto':'serial']=s.slice(i+2,e).trim();i=e+1}
+    else if(ai==='01'){i+=16}
+    else break;
+  }
+  return o;
+}
+function ymd(v){let y=2000+ +v.slice(0,2),m=v.slice(2,4),d=v.slice(4,6);if(d==='00')d=String(new Date(y,+m,0).getDate()).padStart(2,'0');return y+'-'+m+'-'+d}
+function findF(code){
+  const c=(code||'').replace(/\D/g,'');if(!c)return null;
+  return db.farmaci.find(f=>(f.gtin&&f.gtin===c)||(f.aic&&f.aic===c)||(f.aic&&c.length>=10&&c.includes(f.aic)))||null;
+}
+
+/* Calcolo giacenze */
+function lots(){
+  const m={};
+  db.mov.forEach(x=>{const k=x.fid+'|'+x.lotto+'|'+x.scad;m[k]=m[k]||{fid:x.fid,lotto:x.lotto,scad:x.scad,q:0};m[k].q+=x.tipo==='carico'?x.qty:-x.qty});
+  return Object.values(m).filter(l=>l.q>0&&fd(l.fid)).sort((a,b)=>a.scad.localeCompare(b.scad));
+}
+function stato(scad){
+  const g=Math.floor((new Date(scad)-new Date(today()))/864e5);
+  if(g<0)return['Scaduto','t-b'];if(g<=30)return['Scade entro 30 gg','t-b'];if(g<=90)return['Scade entro 90 gg','t-w'];return['Valido','t-ok'];
+}
+const flags=f=>[f.stup?'<span class="tag t-b">Stupefacente</span>':'',f.frigo?'<span class="tag t-w">Frigo</span>':'',f.rischio?'<span class="tag t-w">Alto rischio</span>':''].join(' ');
+
+function renderG(){
+  const L=lots(),tot={};L.forEach(l=>tot[l.fid]=(tot[l.fid]||0)+l.q);
+  const low=db.farmaci.filter(f=>f.min>0&&(tot[f.id]||0)<=f.min);
+  const exp=L.filter(l=>new Date(l.scad)<=new Date(today()));
+  const soon=L.filter(l=>{const g=(new Date(l.scad)-new Date(today()))/864e5;return g>=0&&g<=90}).length;
+  $('kpi').innerHTML=[['Confezioni in magazzino',Object.values(tot).reduce((a,b)=>a+b,0),''],['Lotti in scadenza (90 gg)',soon,soon?'w':''],['Lotti scaduti',exp.length,exp.length?'b':''],['Sotto scorta minima',low.length,low.length?'w':'']].map(k=>'<div class="k '+k[2]+'"><span>'+k[0]+'</span><b>'+k[1]+'</b></div>').join('');
+  $('alerts').innerHTML=(exp.length?'<div class="msg err">Lotti scaduti da ritirare: '+exp.length+'</div>':'')+(low.length?'<div class="msg w">Sotto scorta minima: '+low.map(f=>esc(f.nome)).join(', ')+'</div>':'');
+  $('gTab').innerHTML=L.length?'<table><tr><th>Farmaco</th><th>Lotto</th><th>Scadenza</th><th class="n">Confezioni</th><th>Stato</th><th>Note</th></tr>'+L.map(l=>{const f=fd(l.fid),s=stato(l.scad);return'<tr><td>'+esc(f.nome)+'</td><td>'+esc(l.lotto)+'</td><td>'+fmt(l.scad)+'</td><td class="n">'+l.q+'</td><td><span class="tag '+s[1]+'">'+s[0]+'</span></td><td>'+flags(f)+'</td></tr>'}).join('')+'</table>':'<p class="empty">Nessuna giacenza. Registra un carico dalla scheda Carico.</p>';
+}
+function fillSel(){
+  const o='<option value="">Scegli un farmaco…</option>'+db.farmaci.slice().sort((a,b)=>a.nome.localeCompare(b.nome)).map(f=>'<option value="'+f.id+'">'+esc(f.nome)+'</option>').join('');
+  ['cF','sF'].forEach(i=>{const v=$(i).value;$(i).innerHTML=o;$(i).value=v});
+  const v=$('mF').value;$('mF').innerHTML='<option value="">Tutti i farmaci</option>'+o.replace('<option value="">Scegli un farmaco…</option>','');$('mF').value=v;
+}
+function fillLots(){
+  const l=lots().filter(x=>x.fid===$('sF').value);
+  $('sL').innerHTML=l.map(x=>'<option value="'+esc(x.lotto)+'|'+x.scad+'">'+esc(x.lotto)+' · scad. '+fmt(x.scad)+' · '+x.q+' conf.</option>').join('')||'<option value="">Nessun lotto disponibile</option>';
+}
+function renderA(){
+  $('aTab').innerHTML=db.farmaci.length?'<table><tr><th>AIC</th><th>Denominazione</th><th>Principio attivo</th><th>Forma</th><th class="n">Scorta min.</th><th>Note</th></tr>'+db.farmaci.map(f=>'<tr><td>'+esc(f.aic)+'</td><td>'+esc(f.nome)+'</td><td>'+esc(f.principio)+'</td><td>'+esc(f.forma)+'</td><td class="n">'+f.min+'</td><td>'+flags(f)+'</td></tr>').join('')+'</table>':'<p class="empty">Nessun farmaco in anagrafica. Aggiungine uno o importa un file CSV.</p>';
+}
+function renderM(){
+  const flt=$('mF').value,bal={};
+  const rows=db.mov.map(x=>{bal[x.fid]=(bal[x.fid]||0)+(x.tipo==='carico'?x.qty:-x.qty);return{...x,saldo:bal[x.fid]}}).filter(x=>!flt||x.fid===flt).reverse();
+  $('mTab').innerHTML=rows.length?'<table><tr><th>Data e ora</th><th>Tipo</th><th>Farmaco</th><th>Lotto</th><th>Scadenza</th><th class="n">Q.tà</th><th class="n">Saldo farmaco</th><th>Dettaglio</th><th>Operatore</th></tr>'+rows.map(x=>{const f=fd(x.fid);return'<tr><td>'+new Date(x.ts).toLocaleString('it-IT')+'</td><td>'+x.tipo+'</td><td>'+esc(f?f.nome:'?')+'</td><td>'+esc(x.lotto)+'</td><td>'+fmt(x.scad)+'</td><td class="n">'+(x.tipo==='carico'?'+':'−')+x.qty+'</td><td class="n">'+x.saldo+'</td><td>'+esc(x.note)+'</td><td>'+esc(x.op)+'</td></tr>'}).join('')+'</table>':'<p class="empty">Nessun movimento registrato.</p>';
+}
+function all(){fillSel();fillLots();renderG();renderA();renderM()}
+
+/* Navigazione */
+$('nav').onclick=e=>{const t=e.target.dataset.t;if(!t)return;$('pt').textContent=e.target.textContent;document.querySelectorAll('nav button,section').forEach(x=>x.classList.remove('on'));e.target.classList.add('on');$(t).classList.add('on');if(t==='carico')$('cScan').focus();if(t==='scarico')$('sScan').focus()};
+$('op').value=db.op||'';$('op').oninput=()=>{db.op=$('op').value;save()};
+const needOp=()=>{if(!db.op.trim()){alert('Inserisci il nome dell\u2019operatore in alto.');$('op').focus();return false}return true};
+
+/* Carico */
+$('cScan').onkeydown=e=>{
+  if(e.key!=='Enter')return;e.preventDefault();
+  const p=parseScan($('cScan').value);$('cScan').value='';
+  const f=findF(p.code);
+  if(!f){msg('cMsg','Codice '+p.code+' non presente in anagrafica. Aggiungilo nella scheda Anagrafica farmaci.','err');$('aG').value=p.code;return}
+  $('cF').value=f.id;if(p.lotto)$('cL').value=p.lotto;if(p.scad)$('cS').value=p.scad;
+  msg('cMsg','Riconosciuto: '+f.nome+(p.lotto?'':' · inserisci lotto e scadenza'),'ok');
+  ($('cL').value?($('cQ').value?$('cOk'):$('cQ')):$('cL')).focus();
+};
+$('cOk').onclick=()=>{
+  if(!needOp())return;const q=parseInt($('cQ').value);
+  if(!$('cF').value||!$('cL').value.trim()||!$('cS').value||!(q>0)){msg('cMsg','Compila farmaco, lotto, scadenza e quantità.','err');return}
+  if($('cS').value<today()&&!confirm('Il lotto risulta già scaduto. Registrare comunque il carico?'))return;
+  db.mov.push({id:uid(),ts:new Date().toISOString(),tipo:'carico',fid:$('cF').value,lotto:$('cL').value.trim(),scad:$('cS').value,qty:q,note:$('cD').value.trim(),op:db.op});
+  save();['cL','cS','cQ','cD'].forEach(i=>$(i).value='');$('cF').value='';all();msg('cMsg','Carico registrato.','ok');$('cScan').focus();
+};
+
+/* Scarico */
+$('sF').onchange=fillLots;
+$('sScan').onkeydown=e=>{
+  if(e.key!=='Enter')return;e.preventDefault();
+  const p=parseScan($('sScan').value);$('sScan').value='';const f=findF(p.code);
+  if(!f){msg('sMsg','Codice '+p.code+' non presente in anagrafica.','err');return}
+  $('sF').value=f.id;fillLots();
+  if(p.lotto){const o=[...$('sL').options].find(x=>x.value.startsWith(p.lotto+'|'));if(o)$('sL').value=o.value}
+  msg('sMsg','Riconosciuto: '+f.nome+(f.stup?' · STUPEFACENTE: indica ospite e firma il registro':''),f.stup?'w':'ok');$('sQ').focus();
+};
+$('sOk').onclick=()=>{
+  if(!needOp())return;const f=fd($('sF').value),q=parseInt($('sQ').value),lv=$('sL').value;
+  if(!f||!lv||!(q>0)){msg('sMsg','Scegli farmaco, lotto e quantità.','err');return}
+  const [lotto,scad]=lv.split('|'),l=lots().find(x=>x.fid===f.id&&x.lotto===lotto&&x.scad===scad);
+  if(!l||q>l.q){msg('sMsg','Quantità superiore alla giacenza del lotto ('+(l?l.q:0)+').','err');return}
+  const m=$('sM').value,dest=$('sD').value.trim();
+  if(f.stup&&!dest){msg('sMsg','Per gli stupefacenti indica l\u2019ospite.','err');return}
+  if(scad<today()&&!m.startsWith('Scarto')&&!confirm('Il lotto è scaduto. Usa il motivo "Scarto: scaduto". Continuare comunque?'))return;
+  const older=lots().find(x=>x.fid===f.id&&x.scad<scad&&x.q>0);
+  if(older&&!confirm('Esiste un lotto con scadenza precedente ('+older.lotto+', '+fmt(older.scad)+'). Scaricare comunque questo?'))return;
+  db.mov.push({id:uid(),ts:new Date().toISOString(),tipo:'scarico',fid:f.id,lotto,scad,qty:q,note:m+(dest?' · '+dest:''),op:db.op});
+  save();$('sQ').value=1;$('sD').value='';all();msg('sMsg','Scarico registrato.','ok');$('sScan').focus();
+};
+
+/* Anagrafica */
+$('aOk').onclick=()=>{
+  const aic=$('aA').value.replace(/\D/g,''),g=$('aG').value.replace(/\D/g,''),n=$('aN').value.trim();
+  if(!n||(!aic&&!g)){msg('aMsg','Indica almeno la denominazione e il codice AIC o GTIN.','err');return}
+  if(db.farmaci.some(f=>(aic&&f.aic===aic)||(g&&f.gtin===g))){msg('aMsg','Farmaco già presente.','err');return}
+  db.farmaci.push({id:uid(),aic,gtin:g,nome:n,principio:$('aP').value.trim(),forma:$('aFo').value.trim(),min:parseInt($('aM').value)||0,stup:$('aS').checked,frigo:$('aFr').checked,rischio:$('aR').checked});
+  save();['aA','aG','aN','aP','aFo'].forEach(i=>$(i).value='');['aS','aFr','aR'].forEach(i=>$(i).checked=false);all();msg('aMsg','Farmaco aggiunto.','ok');
+};
+$('aCsv').onchange=e=>{
+  const r=new FileReader();r.onload=()=>{
+    const ln=r.result.split(/\r?\n/).filter(x=>x.trim());if(ln.length<2)return;
+    const sep=ln[0].includes(';')?';':',',h=ln[0].toLowerCase().split(sep).map(x=>x.trim());let n=0;
+    ln.slice(1).forEach(x=>{const c=x.split(sep),g=k=>(c[h.indexOf(k)]||'').trim(),aic=g('aic').replace(/\D/g,''),gt=g('gtin').replace(/\D/g,''),nome=g('nome');
+      if(!nome||(!aic&&!gt)||db.farmaci.some(f=>(aic&&f.aic===aic)||(gt&&f.gtin===gt)))return;
+      db.farmaci.push({id:uid(),aic,gtin:gt,nome,principio:g('principio'),forma:g('forma'),min:0,stup:false,frigo:false,rischio:false});n++});
+    save();all();msg('aMsg','Importati '+n+' farmaci. Controlla e segna stupefacenti, frigo e alto rischio.','ok');
+  };r.readAsText(e.target.files[0]);e.target.value='';
+};
+$('mF').onchange=renderM;
+
+/* Backup ed esportazione */
+function dl(name,txt,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;a.click()}
+$('bExp').onclick=()=>dl('backup-farmaci-'+today()+'.json',JSON.stringify(db),'application/json');
+$('bImp').onclick=()=>$('fImp').click();
+$('fImp').onchange=e=>{const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.farmaci||!d.mov)throw 0;if(!confirm('Sostituire i dati attuali con il backup?'))return;db=d;save();$('op').value=db.op||'';all()}catch(x){alert('File di backup non valido.')}};r.readAsText(e.target.files[0]);e.target.value=''};
+$('mCsv').onclick=()=>{
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  dl('registro-movimenti-'+today()+'.csv','\ufeffdata;tipo;farmaco;aic;lotto;scadenza;quantita;dettaglio;operatore\n'+db.mov.map(x=>{const f=fd(x.fid)||{};return[x.ts,x.tipo,f.nome,f.aic,x.lotto,x.scad,x.qty,x.note,x.op].map(q).join(';')}).join('\n'),'text/csv');
+};
+all();
+</script>
+<script>
+/* Archivio cloud: Firestore, caricato solo se configurato. Senza cloud il programma lavora in locale. */
+const FB='https://www.gstatic.com/firebasejs/10.14.1/',CK='rsa_fb_cfg';
+let cloud=null,unsubs=[],cids={farmaci:new Set(),movimenti:new Set()};
+const setSt=(t,c)=>{$('cst').textContent=t;$('cst').className='pill '+(c||'')};
+const parseCfg=t=>{const o={};t.replace(/["']?(\w+)["']?\s*:\s*["']([^"']+)["']/g,(m,k,v)=>{o[k]=v});return o.apiKey&&o.projectId?o:null};
+async function connect(cfg,email,pw){
+  if(location.protocol==='file:')throw new Error('Il cloud non funziona aprendo il file dal disco: pubblica la pagina su Firebase Hosting (https) e aprila da lì.');
+  setSt('Cloud: connessione…','w');
+  const [A,Au,F]=await Promise.all([import(FB+'firebase-app.js'),import(FB+'firebase-auth.js'),import(FB+'firebase-firestore.js')]);
+  if(cloud)stop();
+  const app=A.initializeApp(cfg),auth=Au.getAuth(app),fs=F.initializeFirestore(app,{localCache:F.persistentLocalCache()});
+  cloud={A,Au,F,app,auth,fs};
+  Au.onAuthStateChanged(auth,u=>u?listen(u):(unlisten(),setSt('Cloud: accesso richiesto','w')));
+  if(email)await Au.signInWithEmailAndPassword(auth,email,pw);
+}
+function stop(){unlisten();try{cloud.A.deleteApp(cloud.app)}catch(e){}cloud=null}
+function unlisten(){unsubs.forEach(f=>f());unsubs=[]}
+function listen(u){
+  unlisten();const {fs,F}=cloud;
+  [['farmaci','farmaci'],['movimenti','mov']].forEach(([n,k])=>unsubs.push(F.onSnapshot(F.collection(fs,n),s=>{
+    cids[n]=new Set(s.docs.map(d=>d.id));
+    const m=new Map(s.docs.map(d=>[d.id,d.data()]));
+    db[k].forEach(x=>{if(!m.has(x.id))m.set(x.id,x)});
+    db[k]=[...m.values()];if(k==='mov')db.mov.sort((a,b)=>a.ts.localeCompare(b.ts));
+    try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}
+    all();window.cloudPush();setSt('Cloud sincronizzato · '+u.email,'ok');
+  },e=>setSt('Cloud: errore '+(e.code||''),'b'))));
+}
+window.cloudPush=()=>{
+  if(!cloud||!cloud.auth.currentUser)return;const {fs,F}=cloud;
+  [['farmaci','farmaci'],['movimenti','mov']].forEach(([n,k])=>db[k].forEach(x=>{
+    if(cids[n].has(x.id))return;cids[n].add(x.id);
+    F.setDoc(F.doc(fs,n,x.id),x).catch(e=>{cids[n].delete(x.id);setSt('Cloud: scrittura rifiutata ('+(e.code||'')+')','b')});
+  }));
+};
+const fbm=(t,c)=>msg('fbMsg',t,c);
+$('bCloud').onclick=()=>{try{const c=JSON.parse(localStorage.getItem(CK));if(c)$('fbCfg').value=Object.entries(c).map(([k,v])=>k+': "'+v+'"').join(',\n')}catch(e){}$('dlg').showModal()};
+$('fbClose').onclick=()=>$('dlg').close();
+$('fbGo').onclick=async()=>{
+  const cfg=parseCfg($('fbCfg').value);if(!cfg){fbm('Configurazione non valida: servono almeno apiKey e projectId.','err');return}
+  if(!$('fbE').value||!$('fbP').value){fbm('Inserisci email e password.','err');return}
+  try{await connect(cfg,$('fbE').value.trim(),$('fbP').value);localStorage.setItem(CK,JSON.stringify(cfg));$('fbP').value='';fbm('Collegato.','ok');setTimeout(()=>$('dlg').close(),600)}
+  catch(e){setSt('Solo su questo computer');fbm(e.code==='auth/invalid-credential'?'Email o password non corrette.':(e.message||'Errore di connessione'),'err')}
+};
+$('fbOut').onclick=async()=>{try{if(cloud)await cloud.Au.signOut(cloud.auth);if(cloud)stop()}catch(e){}localStorage.removeItem(CK);$('fbCfg').value='';setSt('Solo su questo computer');fbm('Scollegato. I dati restano su questo computer.','ok')};
+try{const c=JSON.parse(localStorage.getItem(CK));if(c&&location.protocol!=='file:')connect(c).catch(()=>setSt('Cloud non raggiungibile: lavoro in locale','w'))}catch(e){}
+</script>
+
+</body>
+</html>
