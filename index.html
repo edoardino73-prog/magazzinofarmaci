@@ -51,6 +51,14 @@ textarea{width:100%;font:13px ui-monospace,Consolas,monospace;padding:8px;border
 dialog{border:1px solid var(--line);border-radius:14px;padding:22px;max-width:580px;width:92%;background:var(--card);color:var(--ink)}
 dialog::backdrop{background:rgba(0,0,0,.5)}
 @media(max-width:800px){body{grid-template-columns:1fr}nav{grid-column:1;grid-row:auto;flex-direction:row;flex-wrap:wrap;padding:10px}.brand{display:none}header,main{grid-column:1;padding-left:14px;padding-right:14px}}
+#print{display:none}
+@page{size:A4 landscape;margin:14mm 12mm;@bottom-right{content:"Pag. " counter(page) " di " counter(pages);font-size:10px}}
+@media print{body{display:block;background:#fff;color:#000}nav,header,main,dialog{display:none!important}
+#print{display:block;font:12px/1.4 system-ui,sans-serif;color:#000}#print table{width:100%;border-collapse:collapse}
+#print th,#print td{border:1px solid #777;padding:4px 6px;white-space:normal;color:#000;background:#fff;font-size:11px}
+#print thead{display:table-header-group}#print tr{break-inside:avoid}
+.ph{border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:8px;font-size:13px}.pm{color:#333;font-size:11px}
+.sig{display:flex;justify-content:space-between;margin-top:34px;gap:30px;font-size:11px}}
 </style>
 </head>
 <body>
@@ -70,8 +78,11 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
   <button data-t="giacenze" class="on">Giacenze</button>
   <button data-t="carico">Carico</button>
   <button data-t="scarico">Scarico</button>
+  <button data-t="inventario">Inventario</button>
   <button data-t="anagrafica">Anagrafica farmaci</button>
   <button data-t="movimenti">Registro movimenti</button>
+  <button data-t="temp">Temperature frigo</button>
+  <button data-t="stampe">Stampe e audit</button>
 </nav>
 <main>
 <section id="giacenze" class="on">
@@ -134,9 +145,13 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
     <p><button class="btn" id="aOk">Aggiungi farmaco</button></p>
   </div>
   <div class="card">
-    <h2>Importa elenco farmaci (CSV)</h2>
-    <p class="hint">File con riga di intestazione e colonne: <b>aic;gtin;nome;principio;forma</b> (separatore ; o ,). Puoi preparare il file partendo dagli elenchi pubblicati da AIFA.</p>
-    <input type="file" id="aCsv" accept=".csv,.txt">
+    <h2>Catalogo farmaci AIFA</h2>
+    <p class="hint" id="catInfo"></p>
+    <input type="file" id="aCsv" accept=".csv,.txt,text/csv">
+    <div id="catMsg"></div>
+    <label for="aQ" style="margin-top:12px">Cerca nel catalogo (nome, principio attivo o codice AIC)</label>
+    <input id="aQ" placeholder="es. paracetamolo 500">
+    <div class="tw" id="aRes"></div>
   </div>
   <div class="card"><h2>Elenco farmaci</h2><div class="tw" id="aTab"></div></div>
 </section>
@@ -150,6 +165,36 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
     <p class="hint">I movimenti non si cancellano: un errore si corregge con un movimento di segno opposto.</p>
     <div class="tw" id="mTab"></div>
   </div>
+</section>
+
+<section id="inventario">
+  <div class="card"><h2>Inventario fisico</h2>
+    <p class="hint">Conta le confezioni presenti e scrivi il numero accanto a ogni lotto. Le differenze diventano movimenti di rettifica nel registro.</p>
+    <div class="tw" id="iTab"></div><div id="iMsg"></div>
+    <p class="bar"><button class="btn" id="iOk">Registra rettifiche</button><button class="btn sec" id="iPr">Stampa scheda di conteggio</button></p></div>
+</section>
+<section id="temp">
+  <div class="card"><h2>Registrazione temperatura frigorifero farmaci</h2>
+    <div class="grid"><div><label for="tD">Frigorifero / locale</label><input id="tD" value="Frigorifero farmaci"></div>
+    <div><label for="tMn">Minima °C</label><input id="tMn" type="number" step="0.1"></div>
+    <div><label for="tMx">Massima °C</label><input id="tMx" type="number" step="0.1"></div>
+    <div><label for="tN">Azione correttiva (obbligatoria se fuori 2–8 °C)</label><input id="tN"></div></div>
+    <div id="tMsg"></div><p><button class="btn" id="tOk">Registra temperatura</button></p></div>
+  <div class="card"><h2>Storico</h2><div class="tw" id="tTab"></div></div>
+</section>
+<section id="stampe">
+  <div class="card"><h2>Dati della struttura (intestazione delle stampe)</h2>
+    <div class="grid"><div><label for="sN">Denominazione RSA</label><input id="sN"></div><div><label for="sI">Indirizzo</label><input id="sI"></div>
+    <div><label for="sA">N. autorizzazione / accreditamento</label><input id="sA"></div><div><label for="sR">Responsabile sanitario / farmacista</label><input id="sR"></div></div>
+    <div id="sMsg0"></div><p><button class="btn" id="sSave">Salva dati struttura</button></p>
+    <p class="hint">Questi dati restano su ogni singola postazione: vanno inseriti una volta su ciascun computer.</p></div>
+  <div class="card"><h2>Stampe</h2>
+    <div class="grid"><div><label for="pDa">Dal</label><input id="pDa" type="date"></div><div><label for="pA">Al</label><input id="pA" type="date"></div><div><label for="pF">Farmaco</label><select id="pF"></select></div></div>
+    <p class="bar" id="pBtns"><button class="btn sec" data-p="mov">Registro movimenti</button><button class="btn sec" data-p="stup">Registro stupefacenti</button><button class="btn sec" data-p="giac">Giacenze</button><button class="btn sec" data-p="inv">Scheda inventario</button><button class="btn sec" data-p="scad">Verbale scaduti</button><button class="btn sec" data-p="temp">Temperature frigo</button></p>
+    <p class="hint">Il periodo e il farmaco valgono per movimenti, stupefacenti e temperature. Per salvare in PDF scegli "Salva come PDF" nella finestra di stampa.</p></div>
+  <div class="card"><h2>Integrità del registro</h2>
+    <p class="hint">Ogni movimento riceve una firma digitale (SHA-256) al momento della registrazione. La verifica segnala i movimenti modificati dopo. Ogni stampa del registro riporta il numero di movimenti e l'impronta complessiva: confrontando due stampe si vede se sono stati rimossi movimenti.</p>
+    <div id="vMsg"></div><p><button class="btn sec" id="vBtn">Verifica integrità</button></p></div>
 </section>
 </main>
 
@@ -165,13 +210,15 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
   <div id="fbMsg"></div>
   <div class="bar" style="margin-top:12px"><button class="btn" id="fbGo">Collega e accedi</button><button class="btn sec" id="fbOut">Scollega</button><button class="btn sec" id="fbClose">Chiudi</button></div>
 </dialog>
+<div id="print"></div>
 
 <script>
 const $=id=>document.getElementById(id);
 const K='rsa_farmaci_v1';
-let db={farmaci:[],mov:[],op:''};
+let db={farmaci:[],mov:[],temp:[],cfg:{},op:''};
 try{const r=localStorage.getItem(K);if(r)db=JSON.parse(r)}catch(e){}
-function save(){try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}if(window.cloudPush)window.cloudPush()}
+db.temp=db.temp||[];db.cfg=db.cfg||{};
+function save(){db.mov.forEach(x=>{if(!x.h)x.h=seal(x)});try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}if(window.cloudPush)window.cloudPush()}
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const today=()=>new Date().toISOString().slice(0,10);
@@ -197,7 +244,12 @@ function parseScan(raw){
 function ymd(v){let y=2000+ +v.slice(0,2),m=v.slice(2,4),d=v.slice(4,6);if(d==='00')d=String(new Date(y,+m,0).getDate()).padStart(2,'0');return y+'-'+m+'-'+d}
 function findF(code){
   const c=(code||'').replace(/\D/g,'');if(!c)return null;
-  return db.farmaci.find(f=>(f.gtin&&f.gtin===c)||(f.aic&&f.aic===c)||(f.aic&&c.length>=10&&c.includes(f.aic)))||null;
+  const f=db.farmaci.find(f=>(f.gtin&&f.gtin===c)||(f.aic&&f.aic===c)||(f.aic&&c.length>=10&&c.includes(f.aic)));
+  if(f)return f;
+  const h=cat.find(x=>(x.gtin&&x.gtin===c)||x.aic===c||(c.length>=10&&c.includes(x.aic)));
+  if(!h)return null;
+  const n={id:uid(),aic:h.aic,gtin:c.length>=12?c:(h.gtin||''),nome:h.nome,principio:h.principio,forma:h.forma,min:0,stup:false,frigo:false,rischio:false,cat:true};
+  db.farmaci.push(n);save();all();return n;
 }
 
 /* Calcolo giacenze */
@@ -224,21 +276,27 @@ function renderG(){
 function fillSel(){
   const o='<option value="">Scegli un farmaco…</option>'+db.farmaci.slice().sort((a,b)=>a.nome.localeCompare(b.nome)).map(f=>'<option value="'+f.id+'">'+esc(f.nome)+'</option>').join('');
   ['cF','sF'].forEach(i=>{const v=$(i).value;$(i).innerHTML=o;$(i).value=v});
-  const v=$('mF').value;$('mF').innerHTML='<option value="">Tutti i farmaci</option>'+o.replace('<option value="">Scegli un farmaco…</option>','');$('mF').value=v;
+  const v=$('mF').value;$('mF').innerHTML='<option value="">Tutti i farmaci</option>'+o.replace('<option value="">Scegli un farmaco…</option>','');$('mF').value=v;$('pF').innerHTML=$('mF').innerHTML;
 }
 function fillLots(){
   const l=lots().filter(x=>x.fid===$('sF').value);
   $('sL').innerHTML=l.map(x=>'<option value="'+esc(x.lotto)+'|'+x.scad+'">'+esc(x.lotto)+' · scad. '+fmt(x.scad)+' · '+x.q+' conf.</option>').join('')||'<option value="">Nessun lotto disponibile</option>';
 }
 function renderA(){
-  $('aTab').innerHTML=db.farmaci.length?'<table><tr><th>AIC</th><th>Denominazione</th><th>Principio attivo</th><th>Forma</th><th class="n">Scorta min.</th><th>Note</th></tr>'+db.farmaci.map(f=>'<tr><td>'+esc(f.aic)+'</td><td>'+esc(f.nome)+'</td><td>'+esc(f.principio)+'</td><td>'+esc(f.forma)+'</td><td class="n">'+f.min+'</td><td>'+flags(f)+'</td></tr>').join('')+'</table>':'<p class="empty">Nessun farmaco in anagrafica. Aggiungine uno o importa un file CSV.</p>';
+  const ck=(f,k)=>'<input type="checkbox" data-id="'+f.id+'" data-k="'+k+'"'+(f[k]?' checked':'')+'>';
+  $('aTab').innerHTML=db.farmaci.length?'<table><tr><th>AIC</th><th>Denominazione</th><th>Principio attivo</th><th>Forma</th><th>Stupef.</th><th>Frigo</th><th>Alto rischio</th><th>Scorta min.</th><th></th></tr>'+db.farmaci.map(f=>'<tr><td>'+esc(f.aic)+'</td><td>'+esc(f.nome)+'</td><td>'+esc(f.principio)+'</td><td>'+esc(f.forma)+'</td><td>'+ck(f,'stup')+'</td><td>'+ck(f,'frigo')+'</td><td>'+ck(f,'rischio')+'</td><td><input type="number" min="0" style="width:80px" data-id="'+f.id+'" data-k="min" value="'+f.min+'"></td><td>'+(f.cat?'<label class="chk"><input type="checkbox" data-id="'+f.id+'" data-k="ver"><span class="tag t-w">Da verificare</span></label>':'')+'</td></tr>').join('')+'</table>':'<p class="empty">Nessun farmaco in anagrafica. Cercalo nel catalogo AIFA o aggiungilo a mano.</p>';
 }
+$('aTab').onchange=e=>{
+  const d=e.target.dataset;if(!d.id)return;const f=fd(d.id);if(!f)return;
+  if(d.k==='ver'){if(e.target.checked)delete f.cat}else if(d.k==='min')f.min=parseInt(e.target.value)||0;else f[d.k]=e.target.checked;
+  save();all();
+};
 function renderM(){
   const flt=$('mF').value,bal={};
   const rows=db.mov.map(x=>{bal[x.fid]=(bal[x.fid]||0)+(x.tipo==='carico'?x.qty:-x.qty);return{...x,saldo:bal[x.fid]}}).filter(x=>!flt||x.fid===flt).reverse();
   $('mTab').innerHTML=rows.length?'<table><tr><th>Data e ora</th><th>Tipo</th><th>Farmaco</th><th>Lotto</th><th>Scadenza</th><th class="n">Q.tà</th><th class="n">Saldo farmaco</th><th>Dettaglio</th><th>Operatore</th></tr>'+rows.map(x=>{const f=fd(x.fid);return'<tr><td>'+new Date(x.ts).toLocaleString('it-IT')+'</td><td>'+x.tipo+'</td><td>'+esc(f?f.nome:'?')+'</td><td>'+esc(x.lotto)+'</td><td>'+fmt(x.scad)+'</td><td class="n">'+(x.tipo==='carico'?'+':'−')+x.qty+'</td><td class="n">'+x.saldo+'</td><td>'+esc(x.note)+'</td><td>'+esc(x.op)+'</td></tr>'}).join('')+'</table>':'<p class="empty">Nessun movimento registrato.</p>';
 }
-function all(){fillSel();fillLots();renderG();renderA();renderM()}
+function all(){fillSel();fillLots();renderG();renderA();renderM();renderI();renderT()}
 
 /* Navigazione */
 $('nav').onclick=e=>{const t=e.target.dataset.t;if(!t)return;$('pt').textContent=e.target.textContent;document.querySelectorAll('nav button,section').forEach(x=>x.classList.remove('on'));e.target.classList.add('on');$(t).classList.add('on');if(t==='carico')$('cScan').focus();if(t==='scarico')$('sScan').focus()};
@@ -252,11 +310,12 @@ $('cScan').onkeydown=e=>{
   const f=findF(p.code);
   if(!f){msg('cMsg','Codice '+p.code+' non presente in anagrafica. Aggiungilo nella scheda Anagrafica farmaci.','err');$('aG').value=p.code;return}
   $('cF').value=f.id;if(p.lotto)$('cL').value=p.lotto;if(p.scad)$('cS').value=p.scad;
-  msg('cMsg','Riconosciuto: '+f.nome+(p.lotto?'':' · inserisci lotto e scadenza'),'ok');
+  msg('cMsg','Riconosciuto: '+f.nome+(p.lotto?'':' · inserisci lotto e scadenza')+(f.cat?' · NUOVO dal catalogo AIFA: in Anagrafica indica se è stupefacente, da frigo o ad alto rischio':''),f.cat?'w':'ok');
   ($('cL').value?($('cQ').value?$('cOk'):$('cQ')):$('cL')).focus();
 };
 $('cOk').onclick=()=>{
-  if(!needOp())return;const q=parseInt($('cQ').value);
+  if(!needOp())return;const q=parseInt($('cQ').value);const ff=fd($('cF').value);
+  if(ff&&ff.cat){msg('cMsg','Prima di caricare, vai in Anagrafica farmaci, imposta stupefacente/frigo/alto rischio e spunta "Da verificare".','err');return}
   if(!$('cF').value||!$('cL').value.trim()||!$('cS').value||!(q>0)){msg('cMsg','Compila farmaco, lotto, scadenza e quantità.','err');return}
   if($('cS').value<today()&&!confirm('Il lotto risulta già scaduto. Registrare comunque il carico?'))return;
   db.mov.push({id:uid(),ts:new Date().toISOString(),tipo:'carico',fid:$('cF').value,lotto:$('cL').value.trim(),scad:$('cS').value,qty:q,note:$('cD').value.trim(),op:db.op});
@@ -295,23 +354,162 @@ $('aOk').onclick=()=>{
   db.farmaci.push({id:uid(),aic,gtin:g,nome:n,principio:$('aP').value.trim(),forma:$('aFo').value.trim(),min:parseInt($('aM').value)||0,stup:$('aS').checked,frigo:$('aFr').checked,rischio:$('aR').checked});
   save();['aA','aG','aN','aP','aFo'].forEach(i=>$(i).value='');['aS','aFr','aR'].forEach(i=>$(i).checked=false);all();msg('aMsg','Farmaco aggiunto.','ok');
 };
-$('aCsv').onchange=e=>{
-  const r=new FileReader();r.onload=()=>{
-    const ln=r.result.split(/\r?\n/).filter(x=>x.trim());if(ln.length<2)return;
-    const sep=ln[0].includes(';')?';':',',h=ln[0].toLowerCase().split(sep).map(x=>x.trim());let n=0;
-    ln.slice(1).forEach(x=>{const c=x.split(sep),g=k=>(c[h.indexOf(k)]||'').trim(),aic=g('aic').replace(/\D/g,''),gt=g('gtin').replace(/\D/g,''),nome=g('nome');
-      if(!nome||(!aic&&!gt)||db.farmaci.some(f=>(aic&&f.aic===aic)||(gt&&f.gtin===gt)))return;
-      db.farmaci.push({id:uid(),aic,gtin:gt,nome,principio:g('principio'),forma:g('forma'),min:0,stup:false,frigo:false,rischio:false});n++});
-    save();all();msg('aMsg','Importati '+n+' farmaci. Controlla e segna stupefacenti, frigo e alto rischio.','ok');
-  };r.readAsText(e.target.files[0]);e.target.value='';
-};
 $('mF').onchange=renderM;
+
+/* SHA-256 (sincrono) per la firma dei movimenti */
+function sha256(ascii){
+  function rr(v,a){return(v>>>a)|(v<<(32-a))}
+  var mw=Math.pow(2,32),i,j,res='',words=[],bl=ascii.length*8;
+  var hash=sha256.h=sha256.h||[],k=sha256.k=sha256.k||[],pc=k.length,comp={};
+  for(var c=2;pc<64;c++){if(!comp[c]){for(i=0;i<313;i+=c)comp[i]=c;hash[pc]=(Math.pow(c,.5)*mw)|0;k[pc++]=(Math.pow(c,1/3)*mw)|0}}
+  ascii+='\x80';while(ascii.length%64-56)ascii+='\x00';
+  for(i=0;i<ascii.length;i++){j=ascii.charCodeAt(i);words[i>>2]|=j<<((3-i)%4)*8}
+  words[words.length]=((bl/mw)|0);words[words.length]=bl;
+  for(j=0;j<words.length;){
+    var w=words.slice(j,j+=16),old=hash;hash=hash.slice(0,8);
+    for(i=0;i<64;i++){
+      var w15=w[i-15],w2=w[i-2],a=hash[0],e=hash[4];
+      var t1=hash[7]+(rr(e,6)^rr(e,11)^rr(e,25))+((e&hash[5])^((~e)&hash[6]))+k[i]+(w[i]=(i<16)?w[i]:(w[i-16]+(rr(w15,7)^rr(w15,18)^(w15>>>3))+w[i-7]+(rr(w2,17)^rr(w2,19)^(w2>>>10)))|0);
+      var t2=(rr(a,2)^rr(a,13)^rr(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
+      hash=[(t1+t2)|0].concat(hash);hash[4]=(hash[4]+t1)|0;
+    }
+    for(i=0;i<8;i++)hash[i]=(hash[i]+old[i])|0;
+  }
+  for(i=0;i<8;i++)for(j=3;j+1;j--){var b=(hash[i]>>(j*8))&255;res+=((b<16)?0:'')+b.toString(16)}
+  return res;
+}
+const H=t=>sha256(unescape(encodeURIComponent(t)));
+const seal=x=>H([x.id,x.ts,x.tipo,x.fid,x.lotto,x.scad,x.qty,x.note,x.op].join('|')).slice(0,16);
+const integrity=()=>({bad:db.mov.filter(x=>x.h!==seal(x)),n:db.mov.length,dig:H(db.mov.map(x=>x.h).sort().join('')).slice(0,12)});
+
+/* Inventario */
+let invL=[];
+function renderI(){invL=lots();$('iTab').innerHTML=invL.length?'<table><tr><th>Farmaco</th><th>Lotto</th><th>Scadenza</th><th class="n">Teorico</th><th>Contato</th></tr>'+invL.map((l,i)=>'<tr><td>'+esc(fd(l.fid).nome)+'</td><td>'+esc(l.lotto)+'</td><td>'+fmt(l.scad)+'</td><td class="n">'+l.q+'</td><td><input type="number" min="0" data-i="'+i+'" style="width:90px"></td></tr>').join('')+'</table>':'<p class="empty">Nessun lotto da inventariare.</p>'}
+$('iOk').onclick=()=>{
+  if(!needOp())return;let n=0;
+  document.querySelectorAll('#iTab input').forEach(inp=>{
+    if(inp.value==='')return;const l=invL[+inp.dataset.i],c=parseInt(inp.value),d=c-l.q;if(isNaN(c)||d===0)return;
+    db.mov.push({id:uid(),ts:new Date().toISOString(),tipo:d>0?'carico':'scarico',fid:l.fid,lotto:l.lotto,scad:l.scad,qty:Math.abs(d),note:'Rettifica inventario: teorico '+l.q+', contato '+c,op:db.op});n++;
+  });
+  if(n){save();all()}msg('iMsg',n?'Registrate '+n+' rettifiche.':'Nessuna differenza da registrare.',n?'w':'ok');
+};
+$('iPr').onclick=()=>$('pBtns').onclick({target:{dataset:{p:'inv'}}});
+
+/* Temperature frigo */
+const tOut=x=>x.min<2||x.max>8;
+function renderT(){const r=db.temp.slice().sort((a,b)=>b.ts.localeCompare(a.ts));
+  $('tTab').innerHTML=r.length?'<table><tr><th>Data e ora</th><th>Dispositivo</th><th class="n">Min °C</th><th class="n">Max °C</th><th>Esito</th><th>Azione correttiva</th><th>Operatore</th></tr>'+r.map(x=>'<tr><td>'+new Date(x.ts).toLocaleString('it-IT')+'</td><td>'+esc(x.dev)+'</td><td class="n">'+x.min+'</td><td class="n">'+x.max+'</td><td><span class="tag '+(tOut(x)?'t-b':'t-ok')+'">'+(tOut(x)?'Fuori range':'Conforme')+'</span></td><td>'+esc(x.note)+'</td><td>'+esc(x.op)+'</td></tr>').join('')+'</table>':'<p class="empty">Nessuna registrazione.</p>'}
+$('tOk').onclick=()=>{
+  if(!needOp())return;const mn=parseFloat($('tMn').value),mx=parseFloat($('tMx').value),n=$('tN').value.trim(),d=$('tD').value.trim();
+  if(isNaN(mn)||isNaN(mx)||!d||mn>mx){msg('tMsg','Inserisci dispositivo e temperature valide (minima ≤ massima).','err');return}
+  if((mn<2||mx>8)&&!n){msg('tMsg','Temperatura fuori dall\u2019intervallo 2–8 °C: indica l\u2019azione correttiva.','err');return}
+  db.temp.push({id:uid(),ts:new Date().toISOString(),dev:d,min:mn,max:mx,note:n,op:db.op});save();
+  $('tMn').value=$('tMx').value=$('tN').value='';renderT();msg('tMsg',(mn<2||mx>8)?'Registrata (fuori range, azione annotata).':'Temperatura registrata.',(mn<2||mx>8)?'w':'ok');
+};
+
+/* Stampe */
+const E=esc,ld=x=>new Date(x.ts).toLocaleDateString('sv'),dt=x=>new Date(x.ts).toLocaleString('it-IT');
+['N:nome','I:ind','A:aut','R:resp'].forEach(p=>{const [i,k]=p.split(':');$('s'+i).value=db.cfg[k]||''});
+$('pDa').value=today().slice(0,8)+'01';$('pA').value=today();
+$('sSave').onclick=()=>{db.cfg={nome:$('sN').value.trim(),ind:$('sI').value.trim(),aut:$('sA').value.trim(),resp:$('sR').value.trim()};save();msg('sMsg0','Dati della struttura salvati.','ok')};
+function sheet(title,head,rows,o={}){
+  const c=db.cfg;
+  $('print').innerHTML='<div class="ph"><b>'+E(c.nome||'(denominazione struttura non impostata)')+'</b><br>'+E(c.ind||'')+(c.aut?' · Aut./Accr. n. '+E(c.aut):'')+'</div><h2>'+E(title)+'</h2><p class="pm">'+(o.sub||'')+' Stampato il '+new Date().toLocaleString('it-IT')+' da '+E(db.op)+'</p><table><thead><tr>'+head.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(v=>'<td>'+v+'</td>').join('')+'</tr>').join('')+'</tbody></table><p class="pm">'+(o.foot||'')+'</p><div class="sig"><div>L\u2019operatore<br><br>______________________</div><div>Il responsabile'+(c.resp?' ('+E(c.resp)+')':'')+'<br><br>______________________</div></div>';
+  window.print();
+}
+$('pBtns').onclick=e=>{
+  const t=e.target.dataset.p;if(!t||!needOp())return;
+  const a=$('pDa').value||'0000',b=$('pA').value||'9999',fl=$('pF').value,per='Periodo dal '+fmt(a)+' al '+fmt(b)+'. ',L=lots();
+  if(t==='mov'){
+    const I=integrity(),rows=db.mov.map((x,i)=>[x,i]).filter(([x])=>ld(x)>=a&&ld(x)<=b&&(!fl||x.fid===fl)).map(([x,i])=>[i+1,dt(x),x.tipo,E((fd(x.fid)||{}).nome),E(x.lotto),fmt(x.scad),(x.tipo==='carico'?'+':'−')+x.qty,E(x.note),E(x.op)]);
+    sheet('Registro dei movimenti di magazzino farmaci',['N.','Data e ora','Tipo','Farmaco','Lotto','Scad.','Q.tà','Dettaglio','Operatore'],rows,{sub:per,foot:'Movimenti totali nel registro: '+I.n+' · Impronta del registro: '+I.dig+(I.bad.length?' · ATTENZIONE: '+I.bad.length+' movimenti non integri':'')});
+  }else if(t==='stup'){
+    const rows=[];
+    db.farmaci.filter(f=>f.stup&&(!fl||f.id===fl)).forEach(f=>{
+      let s=0,started=false;
+      db.mov.filter(x=>x.fid===f.id).forEach(x=>{
+        const d=ld(x),v=x.tipo==='carico'?x.qty:-x.qty;if(d<a){s+=v;return}if(d>b)return;
+        if(!started){rows.push(['','<b>'+E(f.nome)+'</b> · riporto','','','',s,'','']);started=true}
+        s+=v;rows.push([dt(x),E(f.nome),E(x.note)+' (lotto '+E(x.lotto)+')',x.tipo==='carico'?x.qty:'',x.tipo==='scarico'?x.qty:'',s,E(x.op),'']);
+      });
+      if(!started)rows.push(['','<b>'+E(f.nome)+'</b> · riporto','nessun movimento nel periodo','','',s,'','']);
+    });
+    sheet('Registro di carico e scarico stupefacenti',['Data e ora','Farmaco','Causale / ospite','Entrata','Uscita','Saldo','Operatore','Firma'],rows.length?rows:[['Nessun farmaco stupefacente in anagrafica','','','','','','','']],{sub:per,foot:'Documento di supporto: non sostituisce il registro vidimato previsto dalla normativa.'});
+  }else if(t==='giac'||t==='inv'){
+    const inv=t==='inv',rows=L.map(l=>{const f=fd(l.fid);return[E(f.nome),E(l.lotto),fmt(l.scad),l.q,stato(l.scad)[0],[f.stup?'Stupefacente':'',f.frigo?'Frigo':'',f.rischio?'Alto rischio':''].filter(Boolean).join(', ')].concat(inv?['','']:[])});
+    sheet(inv?'Scheda di inventario (conteggio fisico)':'Giacenze di magazzino farmaci',['Farmaco','Lotto','Scadenza','Q.tà teorica','Stato','Note'].concat(inv?['Contato','Differenza']:[]),rows,{sub:'Situazione al '+new Date().toLocaleDateString('it-IT')+'.'});
+  }else if(t==='scad'){
+    const rows=L.filter(l=>l.scad<=today()).map(l=>[E(fd(l.fid).nome),E(l.lotto),fmt(l.scad),l.q,'']);
+    sheet('Verbale di ritiro e scarto farmaci scaduti',['Farmaco','Lotto','Scadenza','Confezioni','Modalità di smaltimento'],rows.length?rows:[['Nessun lotto scaduto presente','','','','']],{sub:'Data '+new Date().toLocaleDateString('it-IT')+'.',foot:'Dopo il ritiro registrare lo scarico nella scheda Scarico con motivo "Scarto: scaduto".'});
+  }else if(t==='temp'){
+    const rows=db.temp.filter(x=>ld(x)>=a&&ld(x)<=b).sort((p,q)=>p.ts.localeCompare(q.ts)).map(x=>[dt(x),E(x.dev),x.min,x.max,tOut(x)?'FUORI RANGE':'Conforme',E(x.note),E(x.op)]);
+    sheet('Registro temperature frigorifero farmaci',['Data e ora','Dispositivo','Min °C','Max °C','Esito','Azione correttiva','Operatore'],rows,{sub:per+'Intervallo di conservazione: 2–8 °C.'});
+  }
+};
+$('vBtn').onclick=()=>{const I=integrity();msg('vMsg',I.bad.length?'Attenzione: '+I.bad.length+' movimenti su '+I.n+' non corrispondono alla loro firma (modificati dopo la registrazione).':'Registro integro: '+I.n+' movimenti verificati. Impronta '+I.dig+'.',I.bad.length?'err':'ok')};
+save();
+
+/* Catalogo AIFA (IndexedDB, solo su questo computer) */
+let cat=[];
+const idb=(m,fn)=>new Promise((res,rej)=>{const r=indexedDB.open('rsa_cat',1);r.onupgradeneeded=()=>r.result.createObjectStore('c');r.onerror=()=>rej(r.error);
+  r.onsuccess=()=>{const t=r.result.transaction('c',m),q=fn(t.objectStore('c'));t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)}});
+function catInfo(){$('catInfo').textContent=cat.length?'Catalogo caricato: '+cat.length.toLocaleString('it-IT')+' voci. Puoi ricaricare un file aggiornato quando vuoi.':'Nessun catalogo caricato. Scarica il CSV "Anagrafica Farmaci" dal sito AIFA (Open Data → Liste dei farmaci) e caricalo qui.'}
+idb('readonly',s=>s.get('cat')).then(v=>{cat=v||[];catInfo()}).catch(catInfo);
+const nm=h=>h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+function col(H,...ks){for(const k of ks){const i=H.indexOf(k);if(i>=0)return i}for(const k of ks){const i=H.findIndex(h=>h.includes(k));if(i>=0)return i}return -1}
+function parseCSV(t){
+  t=t.replace(/^\uFEFF/,'');
+  const first=t.split(/\r?\n/,1)[0],sep=[';','\t',','].map(c=>[c,first.split(c).length]).sort((a,b)=>b[1]-a[1])[0][0];
+  const rows=[];let r=[],f='',q=false;
+  for(let i=0;i<t.length;i++){const c=t[i];
+    if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+    else if(c==='"')q=true;else if(c===sep){r.push(f);f=''}
+    else if(c==='\n'){r.push(f);rows.push(r);r=[];f=''}else if(c!=='\r')f+=c}
+  if(f||r.length){r.push(f);rows.push(r)}
+  return rows;
+}
+$('aCsv').onchange=async e=>{
+  const file=e.target.files[0];e.target.value='';if(!file)return;
+  msg('catMsg','Lettura di '+file.name+' in corso…','w');
+  try{
+    const buf=await file.arrayBuffer();let t;
+    try{t=new TextDecoder('utf-8',{fatal:true}).decode(buf)}catch(x){t=new TextDecoder('windows-1252').decode(buf)}
+    const rows=parseCSV(t).filter(r=>r.some(x=>x.trim()));
+    if(rows.length<2)throw new Error('Il file sembra vuoto o non è un CSV.');
+    const hd=rows[0],H=hd.map(nm),iA=col(H,'aic','codiceaic','codaic'),iN=col(H,'denominazione','nomemedicinale','medicinale','nome','descrizione'),iC=col(H,'confezione'),iP=col(H,'principioattivo','principio'),iF=col(H,'forma'),iG=col(H,'gtin','ean','codicebarre','barcode');
+    if(iA<0||iN<0)throw new Error('Non riconosco le colonne di codice AIC e denominazione. Colonne trovate: '+hd.join(' | ')+'. Mandami queste intestazioni e adatto la lettura.');
+    const g=(r,i)=>i>=0?(r[i]||'').trim():'',out=[];
+    rows.slice(1).forEach(r=>{
+      let aic=g(r,iA).replace(/\D/g,'');if(aic.length>=7&&aic.length<9)aic=aic.padStart(9,'0');
+      const nome=[g(r,iN),iC>=0&&iC!==iN?g(r,iC):''].filter(Boolean).join(' – ');
+      if(!aic||!nome)return;
+      out.push({aic,nome,principio:g(r,iP),forma:g(r,iF),gtin:g(r,iG).replace(/\D/g,'')});
+    });
+    if(!out.length)throw new Error('Nessuna riga utilizzabile. Colonne trovate: '+hd.join(' | ')+'.');
+    await idb('readwrite',s=>s.put(out,'cat'));cat=out;catInfo();
+    msg('catMsg','Importate '+out.length.toLocaleString('it-IT')+' voci su '+(rows.length-1).toLocaleString('it-IT')+' righe. Colonne usate: AIC = "'+hd[iA]+'", nome = "'+hd[iN]+'"'+(iP>=0?', principio = "'+hd[iP]+'"':'')+'.','ok');
+  }catch(err){msg('catMsg',err.message||'Impossibile leggere il file.','err')}
+};
+let resL=[],tmr;
+$('aQ').oninput=()=>{clearTimeout(tmr);tmr=setTimeout(()=>{
+  const q=$('aQ').value.toLowerCase().split(/\s+/).filter(Boolean);
+  if(!q.length){$('aRes').innerHTML='';return}
+  if(!cat.length){$('aRes').innerHTML='<p class="hint">Carica prima il catalogo AIFA.</p>';return}
+  resL=[];for(const c of cat){const h=(c.aic+' '+c.nome+' '+c.principio).toLowerCase();if(q.every(w=>h.includes(w))){resL.push(c);if(resL.length>=25)break}}
+  $('aRes').innerHTML=resL.length?'<table><tr><th>AIC</th><th>Denominazione</th><th>Principio attivo</th><th>Forma</th><th></th></tr>'+resL.map((c,i)=>'<tr><td>'+esc(c.aic)+'</td><td>'+esc(c.nome)+'</td><td>'+esc(c.principio)+'</td><td>'+esc(c.forma)+'</td><td><button class="btn sec" data-i="'+i+'">Aggiungi</button></td></tr>').join('')+'</table>':'<p class="empty">Nessun risultato.</p>';
+},200)};
+$('aRes').onclick=e=>{
+  const i=e.target.dataset.i;if(i===undefined)return;const c=resL[+i];
+  if(db.farmaci.some(f=>f.aic===c.aic)){msg('aMsg','Già presente in anagrafica.','err');return}
+  db.farmaci.push({id:uid(),aic:c.aic,gtin:c.gtin||'',nome:c.nome,principio:c.principio,forma:c.forma,min:0,stup:false,frigo:false,rischio:false,cat:true});
+  save();all();msg('aMsg','Aggiunto: '+c.nome+'. In tabella indica stupefacente/frigo/alto rischio e spunta "Da verificare".','ok');
+};
 
 /* Backup ed esportazione */
 function dl(name,txt,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;a.click()}
 $('bExp').onclick=()=>dl('backup-farmaci-'+today()+'.json',JSON.stringify(db),'application/json');
 $('bImp').onclick=()=>$('fImp').click();
-$('fImp').onchange=e=>{const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.farmaci||!d.mov)throw 0;if(!confirm('Sostituire i dati attuali con il backup?'))return;db=d;save();$('op').value=db.op||'';all()}catch(x){alert('File di backup non valido.')}};r.readAsText(e.target.files[0]);e.target.value=''};
+$('fImp').onchange=e=>{const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.farmaci||!d.mov)throw 0;if(!confirm('Sostituire i dati attuali con il backup?'))return;db=d;db.temp=db.temp||[];db.cfg=db.cfg||{};save();$('op').value=db.op||'';all()}catch(x){alert('File di backup non valido.')}};r.readAsText(e.target.files[0]);e.target.value=''};
 $('mCsv').onclick=()=>{
   const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
   dl('registro-movimenti-'+today()+'.csv','\ufeffdata;tipo;farmaco;aic;lotto;scadenza;quantita;dettaglio;operatore\n'+db.mov.map(x=>{const f=fd(x.fid)||{};return[x.ts,x.tipo,f.nome,f.aic,x.lotto,x.scad,x.qty,x.note,x.op].map(q).join(';')}).join('\n'),'text/csv');
@@ -321,7 +519,9 @@ all();
 <script>
 /* Archivio cloud: Firestore, caricato solo se configurato. Senza cloud il programma lavora in locale. */
 const FB='https://www.gstatic.com/firebasejs/10.14.1/',CK='rsa_fb_cfg';
-let cloud=null,unsubs=[],cids={farmaci:new Set(),movimenti:new Set()};
+const COLS=[['farmaci','farmaci'],['movimenti','mov'],['temperature','temp']];
+const nj=o=>JSON.stringify(Object.keys(o).sort().map(k=>[k,o[k]]));
+let last={},cloud=null,unsubs=[],cids={farmaci:new Set(),movimenti:new Set(),temperature:new Set()};
 const setSt=(t,c)=>{$('cst').textContent=t;$('cst').className='pill '+(c||'')};
 const parseCfg=t=>{const o={};t.replace(/["']?(\w+)["']?\s*:\s*["']([^"']+)["']/g,(m,k,v)=>{o[k]=v});return o.apiKey&&o.projectId?o:null};
 async function connect(cfg,email,pw){
@@ -338,20 +538,21 @@ function stop(){unlisten();try{cloud.A.deleteApp(cloud.app)}catch(e){}cloud=null
 function unlisten(){unsubs.forEach(f=>f());unsubs=[]}
 function listen(u){
   unlisten();const {fs,F}=cloud;
-  [['farmaci','farmaci'],['movimenti','mov']].forEach(([n,k])=>unsubs.push(F.onSnapshot(F.collection(fs,n),s=>{
-    cids[n]=new Set(s.docs.map(d=>d.id));
+  COLS.forEach(([n,k])=>unsubs.push(F.onSnapshot(F.collection(fs,n),s=>{
+    cids[n]=new Set(s.docs.map(d=>d.id));if(n==='farmaci')s.docs.forEach(d=>{last[d.id]=nj(d.data())});
     const m=new Map(s.docs.map(d=>[d.id,d.data()]));
     db[k].forEach(x=>{if(!m.has(x.id))m.set(x.id,x)});
-    db[k]=[...m.values()];if(k==='mov')db.mov.sort((a,b)=>a.ts.localeCompare(b.ts));
+    db[k]=[...m.values()];if(k!=='farmaci')db[k].sort((a,b)=>a.ts.localeCompare(b.ts));
     try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}
     all();window.cloudPush();setSt('Cloud sincronizzato · '+u.email,'ok');
   },e=>setSt('Cloud: errore '+(e.code||''),'b'))));
 }
 window.cloudPush=()=>{
   if(!cloud||!cloud.auth.currentUser)return;const {fs,F}=cloud;
-  [['farmaci','farmaci'],['movimenti','mov']].forEach(([n,k])=>db[k].forEach(x=>{
-    if(cids[n].has(x.id))return;cids[n].add(x.id);
-    F.setDoc(F.doc(fs,n,x.id),x).catch(e=>{cids[n].delete(x.id);setSt('Cloud: scrittura rifiutata ('+(e.code||'')+')','b')});
+  COLS.forEach(([n,k])=>db[k].forEach(x=>{
+    if(n==='farmaci'){const j=nj(x);if(last[x.id]===j)return;last[x.id]=j}
+    else{if(cids[n].has(x.id))return;cids[n].add(x.id)}
+    F.setDoc(F.doc(fs,n,x.id),x).catch(e=>{if(n==='farmaci')delete last[x.id];else cids[n].delete(x.id);setSt('Cloud: scrittura rifiutata ('+(e.code||'')+')','b')});
   }));
 };
 const fbm=(t,c)=>msg('fbMsg',t,c);
