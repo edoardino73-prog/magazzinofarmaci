@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Magazzino farmaci RSA</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2312809a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.5 20.5a5 5 0 0 1-7-7l10-10a5 5 0 0 1 7 7z'/%3E%3Cpath d='M8.5 8.5l7 7'/%3E%3C/svg%3E">
 <style>
 :root{--bg:#eef2f4;--card:#fff;--ink:#14272f;--mut:#5b6b74;--line:#dbe3e7;--side:#0f2a33;--sideink:#c7dae0;--acc:#12809a;--acc2:#e1f2f6;--ok:#2a7a4b;--warn:#9a5f00;--bad:#b3261e;--badbg:#fbe9e7;--warnbg:#fff1cf;--r:10px}
 @media(prefers-color-scheme:dark){:root{--bg:#0c1519;--card:#152228;--ink:#e6eef2;--mut:#9db0ba;--line:#26373f;--side:#08181e;--sideink:#a9c0c8;--acc:#3fb2d1;--acc2:#143542;--ok:#6cc08b;--warn:#e8b04a;--bad:#ff8a80;--badbg:#3a1f1c;--warnbg:#3a2f14}}
@@ -59,41 +60,57 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 #print thead{display:table-header-group}#print tr{break-inside:avoid}
 .ph{border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:8px;font-size:13px}.pm{color:#333;font-size:11px}
 .sig{display:flex;justify-content:space-between;margin-top:34px;gap:30px;font-size:11px}}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-3px}
+button .i,.k .i{pointer-events:none}
+nav button{display:flex;align-items:center;gap:10px;transition:background .15s}
+.kb{margin-left:auto;font-size:11px;opacity:.65;border:1px solid currentColor;border-radius:4px;padding:0 5px}
+.btn{display:inline-flex;align-items:center;gap:8px;transition:filter .15s,background .15s}
+.btn:hover{filter:brightness(1.1)}.btn.sec:hover{background:var(--acc2)}
+h2{display:flex;align-items:center;gap:8px}h2 .i{color:var(--acc);width:20px;height:20px}
+.lb{display:flex;align-items:center;gap:5px}.lb .i{width:14px;height:14px}
+.k{position:relative}.k .i{position:absolute;right:14px;top:14px;width:26px;height:26px;color:var(--acc)}.k.w .i{color:var(--warn)}.k.b .i{color:var(--bad)}
+.tag .i{width:13px;height:13px;margin-right:4px;vertical-align:-2px}
+.msg{display:flex;gap:8px;align-items:flex-start}.msg .i{margin-top:2px}
+.scan{padding-left:52px;background:var(--acc2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2312809a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2'/><path d='M7 8v8M11 8v8M15 8v8M18 8v8'/></svg>") no-repeat 16px center/26px}
+.onb{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:10px}
+.onb li{display:flex;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:8px}
+.onb .i{color:var(--acc);width:22px;height:22px}.onb .done{opacity:.55}.onb .done .i{color:var(--ok)}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></symbol><symbol id="i-in" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol><symbol id="i-out" viewBox="0 0 24 24"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 21h14"/></symbol><symbol id="i-clip" viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M9 14l2 2 4-4"/></symbol><symbol id="i-pill" viewBox="0 0 24 24"><path d="M10.5 20.5a5 5 0 0 1-7-7l10-10a5 5 0 0 1 7 7z"/><path d="M8.5 8.5l7 7"/></symbol><symbol id="i-thermo" viewBox="0 0 24 24"><path d="M14 14.8V4a2 2 0 0 0-4 0v10.8a4 4 0 1 0 4 0z"/></symbol><symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></symbol><symbol id="i-printer" viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="2"/><path d="M7 14h10v7H7z"/></symbol><symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></symbol><symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-9"/></symbol><symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 10v4M12 18h.01"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="i-down" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M15 17h6v-6"/></symbol><symbol id="i-snow" viewBox="0 0 24 24"><path d="M12 2v20M4.9 7l14.2 10M4.9 17L19.1 7"/></symbol><symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></symbol><symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></symbol></defs></svg>
 <header>
   <h1 id="pt">Giacenze</h1>
   <div class="bar">
     <span class="pill" id="cst">Solo su questo computer</span>
-    <button class="btn sec" id="bCloud">Archivio cloud</button>
-    <div><label for="op">Operatore</label><input id="op" placeholder="Nome e cognome"></div>
-    <button class="btn sec" id="bExp">Salva backup</button>
-    <button class="btn sec" id="bImp">Carica backup</button>
+    <button class="btn sec" id="bCloud"><svg class="i"><use href="#i-cloud"/></svg>Archivio cloud</button>
+    <div><label for="op" class="lb"><svg class="i"><use href="#i-user"/></svg>Operatore</label><input id="op" placeholder="Nome e cognome"></div>
+    <button class="btn sec" id="bExp"><svg class="i"><use href="#i-db"/></svg>Salva backup</button>
+    <button class="btn sec" id="bImp"><svg class="i"><use href="#i-out"/></svg>Carica backup</button>
     <input type="file" id="fImp" accept=".json" hidden>
   </div>
 </header>
 <nav id="nav">
-  <div class="brand"><b>Magazzino farmaci</b><span>RSA · versione 5</span></div>
-  <button data-t="giacenze" class="on">Giacenze</button>
-  <button data-t="carico">Carico</button>
-  <button data-t="scarico">Scarico</button>
-  <button data-t="inventario">Inventario</button>
-  <button data-t="anagrafica">Anagrafica farmaci</button>
-  <button data-t="movimenti">Registro movimenti</button>
-  <button data-t="temp">Temperature frigo</button>
-  <button data-t="stampe">Stampe e audit</button>
+  <div class="brand"><b>Magazzino farmaci</b><span>RSA · versione 7</span></div>
+  <button data-t="giacenze" class="on"><svg class="i"><use href="#i-box"/></svg>Giacenze</button>
+  <button data-t="carico"><svg class="i"><use href="#i-in"/></svg>Carico<span class="kb">F2</span></button>
+  <button data-t="scarico"><svg class="i"><use href="#i-out"/></svg>Scarico<span class="kb">F3</span></button>
+  <button data-t="inventario"><svg class="i"><use href="#i-clip"/></svg>Inventario</button>
+  <button data-t="anagrafica"><svg class="i"><use href="#i-pill"/></svg>Anagrafica farmaci</button>
+  <button data-t="movimenti"><svg class="i"><use href="#i-list"/></svg>Registro movimenti</button>
+  <button data-t="temp"><svg class="i"><use href="#i-thermo"/></svg>Temperature frigo</button>
+  <button data-t="stampe"><svg class="i"><use href="#i-printer"/></svg>Stampe e audit</button>
 </nav>
 <main>
 <section id="giacenze" class="on">
   <div class="kpi" id="kpi"></div>
   <div id="alerts"></div>
-  <div class="card"><h2>Giacenze per lotto</h2><div class="tw" id="gTab"></div></div>
+  <div class="card"><h2><svg class="i"><use href="#i-box"/></svg>Giacenze per lotto</h2><div class="tw" id="gTab"></div></div>
 </section>
 
 <section id="carico">
   <div class="card">
-    <h2>Carico in magazzino</h2>
+    <h2><svg class="i"><use href="#i-in"/></svg>Carico in magazzino</h2>
     <label for="cScan">Scansiona la confezione</label>
     <input id="cScan" class="scan" autocomplete="off" placeholder="Clicca qui e usa il lettore (Data Matrix o codice a barre)">
     <div id="cMsg"></div>
@@ -104,13 +121,13 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
       <div><label for="cQ">Quantità (confezioni)</label><input id="cQ" type="number" min="1" step="1"></div>
       <div><label for="cD">Documento (DDT/fattura) e fornitore</label><input id="cD"></div>
     </div>
-    <p><button class="btn" id="cOk">Registra carico</button></p>
+    <p><button class="btn" id="cOk"><svg class="i"><use href="#i-check"/></svg>Registra carico</button></p>
   </div>
 </section>
 
 <section id="scarico">
   <div class="card">
-    <h2>Scarico dal magazzino</h2>
+    <h2><svg class="i"><use href="#i-out"/></svg>Scarico dal magazzino</h2>
     <label for="sScan">Scansiona la confezione</label>
     <input id="sScan" class="scan" autocomplete="off" placeholder="Clicca qui e usa il lettore">
     <div id="sMsg"></div>
@@ -121,13 +138,13 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
       <div><label for="sM">Motivo</label><select id="sM"><option>Somministrazione</option><option>Reso al fornitore</option><option>Scarto: scaduto</option><option>Scarto: altro</option><option>Rettifica inventario</option></select></div>
       <div><label for="sD">Ospite / reparto (obbligatorio per stupefacenti)</label><input id="sD"></div>
     </div>
-    <p><button class="btn" id="sOk">Registra scarico</button></p>
+    <p><button class="btn" id="sOk"><svg class="i"><use href="#i-check"/></svg>Registra scarico</button></p>
   </div>
 </section>
 
 <section id="anagrafica">
   <div class="card">
-    <h2>Nuovo farmaco</h2>
+    <h2><svg class="i"><use href="#i-plus"/></svg>Nuovo farmaco</h2>
     <div class="grid">
       <div><label for="aA">Codice AIC</label><input id="aA" inputmode="numeric"></div>
       <div><label for="aG">GTIN / codice a barre (facoltativo)</label><input id="aG" inputmode="numeric"></div>
@@ -142,25 +159,25 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
       <label class="chk"><input type="checkbox" id="aR"> Alto rischio / LASA</label>
     </p>
     <div id="aMsg"></div>
-    <p><button class="btn" id="aOk">Aggiungi farmaco</button></p>
+    <p><button class="btn" id="aOk"><svg class="i"><use href="#i-plus"/></svg>Aggiungi farmaco</button></p>
   </div>
   <div class="card">
-    <h2>Catalogo farmaci AIFA</h2>
+    <h2><svg class="i"><use href="#i-search"/></svg>Catalogo farmaci AIFA</h2>
     <p class="hint" id="catInfo"></p>
     <input type="file" id="aCsv" accept=".csv,.txt,text/csv">
     <div id="catMsg"></div>
-    <label for="aQ" style="margin-top:12px">Cerca nel catalogo (nome, principio attivo o codice AIC)</label>
+    <label for="aQ" class="lb" style="margin-top:12px"><svg class="i"><use href="#i-search"/></svg>Cerca nel catalogo (nome, principio attivo o codice AIC)</label>
     <input id="aQ" placeholder="es. paracetamolo 500">
     <div class="tw" id="aRes"></div>
   </div>
-  <div class="card"><h2>Elenco farmaci</h2><div class="tw" id="aTab"></div></div>
+  <div class="card"><h2><svg class="i"><use href="#i-pill"/></svg>Elenco farmaci</h2><div class="tw" id="aTab"></div></div>
 </section>
 
 <section id="movimenti">
   <div class="card">
     <div class="bar" style="justify-content:space-between">
-      <h2>Registro movimenti</h2>
-      <div class="bar"><select id="mF" style="width:auto"></select><button class="btn sec" id="mCsv">Esporta CSV</button></div>
+      <h2><svg class="i"><use href="#i-list"/></svg>Registro movimenti</h2>
+      <div class="bar"><select id="mF" style="width:auto"></select><button class="btn sec" id="mCsv"><svg class="i"><use href="#i-in"/></svg>Esporta CSV</button></div>
     </div>
     <p class="hint">I movimenti non si cancellano: un errore si corregge con un movimento di segno opposto.</p>
     <div class="tw" id="mTab"></div>
@@ -168,38 +185,38 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 </section>
 
 <section id="inventario">
-  <div class="card"><h2>Inventario fisico</h2>
+  <div class="card"><h2><svg class="i"><use href="#i-clip"/></svg>Inventario fisico</h2>
     <p class="hint">Conta le confezioni presenti e scrivi il numero accanto a ogni lotto. Le differenze diventano movimenti di rettifica nel registro.</p>
     <div class="tw" id="iTab"></div><div id="iMsg"></div>
-    <p class="bar"><button class="btn" id="iOk">Registra rettifiche</button><button class="btn sec" id="iPr">Stampa scheda di conteggio</button></p></div>
+    <p class="bar"><button class="btn" id="iOk"><svg class="i"><use href="#i-check"/></svg>Registra rettifiche</button><button class="btn sec" id="iPr"><svg class="i"><use href="#i-printer"/></svg>Stampa scheda di conteggio</button></p></div>
 </section>
 <section id="temp">
-  <div class="card"><h2>Registrazione temperatura frigorifero farmaci</h2>
+  <div class="card"><h2><svg class="i"><use href="#i-thermo"/></svg>Registrazione temperatura frigorifero farmaci</h2>
     <div class="grid"><div><label for="tD">Frigorifero / locale</label><input id="tD" value="Frigorifero farmaci"></div>
     <div><label for="tMn">Minima °C</label><input id="tMn" type="number" step="0.1"></div>
     <div><label for="tMx">Massima °C</label><input id="tMx" type="number" step="0.1"></div>
     <div><label for="tN">Azione correttiva (obbligatoria se fuori 2–8 °C)</label><input id="tN"></div></div>
-    <div id="tMsg"></div><p><button class="btn" id="tOk">Registra temperatura</button></p></div>
-  <div class="card"><h2>Storico</h2><div class="tw" id="tTab"></div></div>
+    <div id="tMsg"></div><p><button class="btn" id="tOk"><svg class="i"><use href="#i-check"/></svg>Registra temperatura</button></p></div>
+  <div class="card"><h2><svg class="i"><use href="#i-clock"/></svg>Storico</h2><div class="tw" id="tTab"></div></div>
 </section>
 <section id="stampe">
-  <div class="card"><h2>Dati della struttura (intestazione delle stampe)</h2>
+  <div class="card"><h2><svg class="i"><use href="#i-home"/></svg>Dati della struttura (intestazione delle stampe)</h2>
     <div class="grid"><div><label for="sN">Denominazione RSA</label><input id="sN"></div><div><label for="sI">Indirizzo</label><input id="sI"></div>
     <div><label for="sA">N. autorizzazione / accreditamento</label><input id="sA"></div><div><label for="sR">Responsabile sanitario / farmacista</label><input id="sR"></div></div>
-    <div id="sMsg0"></div><p><button class="btn" id="sSave">Salva dati struttura</button></p>
+    <div id="sMsg0"></div><p><button class="btn" id="sSave"><svg class="i"><use href="#i-check"/></svg>Salva dati struttura</button></p>
     <p class="hint">Questi dati restano su ogni singola postazione: vanno inseriti una volta su ciascun computer.</p></div>
-  <div class="card"><h2>Stampe</h2>
+  <div class="card"><h2><svg class="i"><use href="#i-printer"/></svg>Stampe</h2>
     <div class="grid"><div><label for="pDa">Dal</label><input id="pDa" type="date"></div><div><label for="pA">Al</label><input id="pA" type="date"></div><div><label for="pF">Farmaco</label><select id="pF"></select></div></div>
-    <p class="bar" id="pBtns"><button class="btn sec" data-p="mov">Registro movimenti</button><button class="btn sec" data-p="stup">Registro stupefacenti</button><button class="btn sec" data-p="giac">Giacenze</button><button class="btn sec" data-p="inv">Scheda inventario</button><button class="btn sec" data-p="scad">Verbale scaduti</button><button class="btn sec" data-p="temp">Temperature frigo</button></p>
+    <p class="bar" id="pBtns"><button class="btn sec" data-p="mov"><svg class="i"><use href="#i-list"/></svg>Registro movimenti</button><button class="btn sec" data-p="stup"><svg class="i"><use href="#i-lock"/></svg>Registro stupefacenti</button><button class="btn sec" data-p="giac"><svg class="i"><use href="#i-box"/></svg>Giacenze</button><button class="btn sec" data-p="inv"><svg class="i"><use href="#i-clip"/></svg>Scheda inventario</button><button class="btn sec" data-p="scad"><svg class="i"><use href="#i-file"/></svg>Verbale scaduti</button><button class="btn sec" data-p="temp"><svg class="i"><use href="#i-thermo"/></svg>Temperature frigo</button></p>
     <p class="hint">Il periodo e il farmaco valgono per movimenti, stupefacenti e temperature. Per salvare in PDF scegli "Salva come PDF" nella finestra di stampa.</p></div>
-  <div class="card"><h2>Integrità del registro</h2>
+  <div class="card"><h2><svg class="i"><use href="#i-shield"/></svg>Integrità del registro</h2>
     <p class="hint">Ogni movimento riceve una firma digitale (SHA-256) al momento della registrazione. La verifica segnala i movimenti modificati dopo. Ogni stampa del registro riporta il numero di movimenti e l'impronta complessiva: confrontando due stampe si vede se sono stati rimossi movimenti.</p>
-    <div id="vMsg"></div><p><button class="btn sec" id="vBtn">Verifica integrità</button></p></div>
+    <div id="vMsg"></div><p><button class="btn sec" id="vBtn"><svg class="i"><use href="#i-shield"/></svg>Verifica integrità</button></p></div>
 </section>
 </main>
 
 <dialog id="dlg">
-  <h2>Archivio cloud (Firebase)</h2>
+  <h2><svg class="i"><use href="#i-cloud"/></svg>Archivio cloud (Firebase)</h2>
   <p class="hint">Copia e incolla qui la configurazione web del tuo progetto Firebase (Impostazioni progetto → Le tue app → Configurazione SDK), poi accedi con un utente creato in Firebase Authentication.</p>
   <label for="fbCfg">Configurazione Firebase</label>
   <textarea id="fbCfg" rows="7" placeholder='apiKey: "…", authDomain: "…", projectId: "…", appId: "…"'></textarea>
@@ -224,7 +241,9 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const today=()=>new Date().toISOString().slice(0,10);
 const fmt=d=>d?d.split('-').reverse().join('/'):'';
 const fd=id=>db.farmaci.find(f=>f.id===id);
-function msg(el,t,c){$(el).innerHTML=t?'<div class="msg '+c+'">'+esc(t)+'</div>':''}
+function ic(n){return '<svg class="i"><use href="#i-'+n+'"/></svg>'}
+function msg(el,t,c){$(el).innerHTML=t?'<div class="msg '+c+'">'+ic(c==='ok'?'check':c==='err'?'x':'alert')+'<span>'+esc(t)+'</span></div>':''}
+function onboard(){const st=[['home','Inserisci i dati della RSA','in "Stampe e audit"',!!(db.cfg&&db.cfg.nome)],['search','Carica il catalogo AIFA','in "Anagrafica farmaci"',cat.length>0],['in','Scansiona le prime confezioni','in "Carico"',false]];return '<ul class="onb">'+st.map(x=>'<li class="'+(x[3]?'done':'')+'">'+ic(x[3]?'check':x[0])+'<span><b>'+x[1]+'</b> '+x[2]+'</span></li>').join('')+'</ul>'}
 
 /* Lettura codici: GS1 Data Matrix (01 GTIN, 17 scadenza, 10 lotto, 21 seriale) o codice semplice */
 function parseScan(raw){
@@ -248,7 +267,7 @@ function findF(code){
   if(f)return f;
   const h=cat.find(x=>(x.gtin&&x.gtin===c)||x.aic===c||(c.length>=10&&c.includes(x.aic)));
   if(!h)return null;
-  const n={id:uid(),aic:h.aic,gtin:c.length>=12?c:(h.gtin||''),nome:h.nome,principio:h.principio,forma:h.forma,min:0,stup:false,frigo:false,rischio:false,cat:true};
+  const n={id:uid(),aic:h.aic,gtin:c.length>=12?c:(h.gtin||''),nome:h.nome,principio:h.principio,forma:h.forma,min:0,stup:!!h.sp,frigo:false,rischio:false,cat:true};
   db.farmaci.push(n);save();all();return n;
 }
 
@@ -262,16 +281,16 @@ function stato(scad){
   const g=Math.floor((new Date(scad)-new Date(today()))/864e5);
   if(g<0)return['Scaduto','t-b'];if(g<=30)return['Scade entro 30 gg','t-b'];if(g<=90)return['Scade entro 90 gg','t-w'];return['Valido','t-ok'];
 }
-const flags=f=>[f.stup?'<span class="tag t-b">Stupefacente</span>':'',f.frigo?'<span class="tag t-w">Frigo</span>':'',f.rischio?'<span class="tag t-w">Alto rischio</span>':''].join(' ');
+const flags=f=>[f.stup?'<span class="tag t-b">'+ic('lock')+'Stupefacente</span>':'',f.frigo?'<span class="tag t-w">'+ic('snow')+'Frigo</span>':'',f.rischio?'<span class="tag t-w">'+ic('alert')+'Alto rischio</span>':''].join(' ');
 
 function renderG(){
   const L=lots(),tot={};L.forEach(l=>tot[l.fid]=(tot[l.fid]||0)+l.q);
   const low=db.farmaci.filter(f=>f.min>0&&(tot[f.id]||0)<=f.min);
   const exp=L.filter(l=>new Date(l.scad)<=new Date(today()));
   const soon=L.filter(l=>{const g=(new Date(l.scad)-new Date(today()))/864e5;return g>=0&&g<=90}).length;
-  $('kpi').innerHTML=[['Confezioni in magazzino',Object.values(tot).reduce((a,b)=>a+b,0),''],['Lotti in scadenza (90 gg)',soon,soon?'w':''],['Lotti scaduti',exp.length,exp.length?'b':''],['Sotto scorta minima',low.length,low.length?'w':'']].map(k=>'<div class="k '+k[2]+'"><span>'+k[0]+'</span><b>'+k[1]+'</b></div>').join('');
+  $('kpi').innerHTML=[['Confezioni in magazzino',Object.values(tot).reduce((a,b)=>a+b,0),''],['Lotti in scadenza (90 gg)',soon,soon?'w':''],['Lotti scaduti',exp.length,exp.length?'b':''],['Sotto scorta minima',low.length,low.length?'w':'']].map((k,i)=>'<div class="k '+k[2]+'">'+ic(['box','clock','x','down'][i])+'<span>'+k[0]+'</span><b>'+k[1]+'</b></div>').join('');
   $('alerts').innerHTML=(exp.length?'<div class="msg err">Lotti scaduti da ritirare: '+exp.length+'</div>':'')+(low.length?'<div class="msg w">Sotto scorta minima: '+low.map(f=>esc(f.nome)).join(', ')+'</div>':'');
-  $('gTab').innerHTML=L.length?'<table><tr><th>Farmaco</th><th>Lotto</th><th>Scadenza</th><th class="n">Confezioni</th><th>Stato</th><th>Note</th></tr>'+L.map(l=>{const f=fd(l.fid),s=stato(l.scad);return'<tr><td>'+esc(f.nome)+'</td><td>'+esc(l.lotto)+'</td><td>'+fmt(l.scad)+'</td><td class="n">'+l.q+'</td><td><span class="tag '+s[1]+'">'+s[0]+'</span></td><td>'+flags(f)+'</td></tr>'}).join('')+'</table>':'<p class="empty">Nessuna giacenza. Registra un carico dalla scheda Carico.</p>';
+  $('gTab').innerHTML=L.length?'<table><tr><th>Farmaco</th><th>Lotto</th><th>Scadenza</th><th class="n">Confezioni</th><th>Stato</th><th>Note</th></tr>'+L.map(l=>{const f=fd(l.fid),s=stato(l.scad);return'<tr><td>'+esc(f.nome)+'</td><td>'+esc(l.lotto)+'</td><td>'+fmt(l.scad)+'</td><td class="n">'+l.q+'</td><td><span class="tag '+s[1]+'">'+ic(s[1]==='t-ok'?'check':'alert')+s[0]+'</span></td><td>'+flags(f)+'</td></tr>'}).join('')+'</table>':'<div class="empty"><b>Per iniziare</b>'+onboard()+'</div>';
 }
 function fillSel(){
   const o='<option value="">Scegli un farmaco…</option>'+db.farmaci.slice().sort((a,b)=>a.nome.localeCompare(b.nome)).map(f=>'<option value="'+f.id+'">'+esc(f.nome)+'</option>').join('');
@@ -299,7 +318,7 @@ function renderM(){
 function all(){fillSel();fillLots();renderG();renderA();renderM();renderI();renderT()}
 
 /* Navigazione */
-$('nav').onclick=e=>{const t=e.target.dataset.t;if(!t)return;$('pt').textContent=e.target.textContent;document.querySelectorAll('nav button,section').forEach(x=>x.classList.remove('on'));e.target.classList.add('on');$(t).classList.add('on');if(t==='carico')$('cScan').focus();if(t==='scarico')$('sScan').focus()};
+$('nav').onclick=e=>{const b=e.target.closest('button'),t=b&&b.dataset.t;if(!t)return;$('pt').textContent=[...b.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join('').trim();document.querySelectorAll('nav button,section').forEach(x=>x.classList.remove('on'));b.classList.add('on');$(t).classList.add('on');if(t==='carico')$('cScan').focus();if(t==='scarico')$('sScan').focus()};
 $('op').value=db.op||'';$('op').oninput=()=>{db.op=$('op').value;save()};
 const needOp=()=>{if(!db.op.trim()){alert('Inserisci il nome dell\u2019operatore in alto.');$('op').focus();return false}return true};
 
@@ -398,7 +417,7 @@ $('iPr').onclick=()=>$('pBtns').onclick({target:{dataset:{p:'inv'}}});
 /* Temperature frigo */
 const tOut=x=>x.min<2||x.max>8;
 function renderT(){const r=db.temp.slice().sort((a,b)=>b.ts.localeCompare(a.ts));
-  $('tTab').innerHTML=r.length?'<table><tr><th>Data e ora</th><th>Dispositivo</th><th class="n">Min °C</th><th class="n">Max °C</th><th>Esito</th><th>Azione correttiva</th><th>Operatore</th></tr>'+r.map(x=>'<tr><td>'+new Date(x.ts).toLocaleString('it-IT')+'</td><td>'+esc(x.dev)+'</td><td class="n">'+x.min+'</td><td class="n">'+x.max+'</td><td><span class="tag '+(tOut(x)?'t-b':'t-ok')+'">'+(tOut(x)?'Fuori range':'Conforme')+'</span></td><td>'+esc(x.note)+'</td><td>'+esc(x.op)+'</td></tr>').join('')+'</table>':'<p class="empty">Nessuna registrazione.</p>'}
+  $('tTab').innerHTML=r.length?'<table><tr><th>Data e ora</th><th>Dispositivo</th><th class="n">Min °C</th><th class="n">Max °C</th><th>Esito</th><th>Azione correttiva</th><th>Operatore</th></tr>'+r.map(x=>'<tr><td>'+new Date(x.ts).toLocaleString('it-IT')+'</td><td>'+esc(x.dev)+'</td><td class="n">'+x.min+'</td><td class="n">'+x.max+'</td><td><span class="tag '+(tOut(x)?'t-b':'t-ok')+'">'+ic(tOut(x)?'alert':'check')+(tOut(x)?'Fuori range':'Conforme')+'</span></td><td>'+esc(x.note)+'</td><td>'+esc(x.op)+'</td></tr>').join('')+'</table>':'<p class="empty">Nessuna registrazione.</p>'}
 $('tOk').onclick=()=>{
   if(!needOp())return;const mn=parseFloat($('tMn').value),mx=parseFloat($('tMx').value),n=$('tN').value.trim(),d=$('tD').value.trim();
   if(isNaN(mn)||isNaN(mx)||!d||mn>mx){msg('tMsg','Inserisci dispositivo e temperature valide (minima ≤ massima).','err');return}
@@ -453,50 +472,72 @@ save();
 let cat=[];
 const idb=(m,fn)=>new Promise((res,rej)=>{const r=indexedDB.open('rsa_cat',1);r.onupgradeneeded=()=>r.result.createObjectStore('c');r.onerror=()=>rej(r.error);
   r.onsuccess=()=>{const t=r.result.transaction('c',m),q=fn(t.objectStore('c'));t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)}});
-function catInfo(){$('catInfo').textContent=cat.length?'Catalogo caricato: '+cat.length.toLocaleString('it-IT')+' voci. Puoi ricaricare un file aggiornato quando vuoi.':'Nessun catalogo caricato. Scarica il CSV "Anagrafica Farmaci" dal sito AIFA (Open Data → Liste dei farmaci) e caricalo qui.'}
+function catInfo(){$('catInfo').textContent=cat.length?'Catalogo caricato: '+cat.length.toLocaleString('it-IT')+' voci. Puoi ricaricare un file aggiornato quando vuoi.':'Nessun catalogo caricato. Carica il file confezioni_fornitura.csv scaricato dal sito AIFA (Open Data → Liste dei farmaci).'}
 idb('readonly',s=>s.get('cat')).then(v=>{cat=v||[];catInfo()}).catch(catInfo);
 const nm=h=>h.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
 function col(H,...ks){for(const k of ks){const i=H.indexOf(k);if(i>=0)return i}for(const k of ks){const i=H.findIndex(h=>h.includes(k));if(i>=0)return i}return -1}
-function parseCSV(t){
-  t=t.replace(/^\uFEFF/,'');
-  const first=t.split(/\r?\n/,1)[0],cnt=x=>[';','\t',','].map(c=>[c,x.split(c).length]).sort((a,b)=>b[1]-a[1])[0],sep=(cnt(first)[1]>2?cnt(first):cnt(t.slice(0,4000)))[0];
-  const rows=[];let r=[],f='',q=false;
-  for(let i=0;i<t.length;i++){const c=t[i];
-    if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
-    else if(c==='"')q=true;else if(c===sep){r.push(f);f=''}
-    else if(c==='\n'){r.push(f);rows.push(r);r=[];f=''}else if(c!=='\r')f+=c}
-  if(f||r.length){r.push(f);rows.push(r)}
-  return rows;
+const colx=(H,...ks)=>{for(const k of ks){const i=H.indexOf(k);if(i>=0)return i}return -1};
+function qn(t){let n=0,i=-1;while((i=t.indexOf('"',i+1))>=0)n++;return n}
+function splitLine(l,sep){
+  if(l.indexOf('"')<0)return l.split(sep);
+  const o=[];let f='',q=false;
+  for(let i=0;i<l.length;i++){const c=l[i];
+    if(q){if(c==='"'){if(l[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+    else if(c==='"')q=true;else if(c===sep){o.push(f);f=''}else f+=c}
+  o.push(f);return o;
 }
 $('aCsv').onchange=async e=>{
   const file=e.target.files[0];e.target.value='';if(!file)return;
-  msg('catMsg','Selezionato '+file.name+' ('+Math.round(file.size/1024).toLocaleString('it-IT')+' KB). Lettura in corso…','w');
+  msg('catMsg','Selezionato '+file.name+' ('+Math.round(file.size/1048576).toLocaleString('it-IT')+' MB). Lettura in corso…','w');
   await new Promise(r=>setTimeout(r,30));
-  try{
-    const buf=await file.arrayBuffer(),b=new Uint8Array(buf,0,Math.min(4,buf.byteLength));let t;
-    if(b[0]===0x50&&b[1]===0x4B)throw new Error('Questo file è un foglio Excel (.xlsx), non un CSV. Aprilo in Excel e usa "Salva con nome" → "CSV (delimitato dal separatore di elenco)", poi caricalo qui.');
-    if(b[0]===0xFF&&b[1]===0xFE)t=new TextDecoder('utf-16le').decode(buf);
-    else if(b[0]===0xFE&&b[1]===0xFF)t=new TextDecoder('utf-16be').decode(buf);
-    else{try{t=new TextDecoder('utf-8',{fatal:true}).decode(buf)}catch(x){t=new TextDecoder('windows-1252').decode(buf)}}
-    const all=parseCSV(t).filter(r=>r.some(x=>x.trim()));
-    let h0=all.findIndex((r,i)=>i<15&&col(r.map(nm),'aic','codiceaic','codaic')>=0);if(h0<0)h0=0;
-    const rows=all.slice(h0);
-    if(rows.length<2)throw new Error('Il file sembra vuoto o non è un CSV (righe lette: '+all.length+'). Prima riga: '+(all[0]||[]).join(' | ').slice(0,200));
-    const hd=rows[0],H=hd.map(nm),iA=col(H,'aic','codiceaic','codaic'),iN=col(H,'denominazione','nomemedicinale','medicinale','nome','descrizione'),iC=col(H,'confezione'),iP=col(H,'principioattivo','principio'),iF=col(H,'forma'),iG=col(H,'gtin','ean','codicebarre','barcode');
-    if(iA<0||iN<0)throw new Error('Non riconosco le colonne di codice AIC e denominazione. Colonne trovate: '+hd.join(' | ').slice(0,400)+'. Mandami queste intestazioni e adatto la lettura.');
-    const g=(r,i)=>i>=0?(r[i]||'').trim():'',out=[];
-    rows.slice(1).forEach(r=>{
-      let aic=g(r,iA).replace(/\D/g,'');if(aic.length>=7&&aic.length<9)aic=aic.padStart(9,'0');
-      const nome=[g(r,iN),iC>=0&&iC!==iN?g(r,iC):''].filter(Boolean).join(' – ');
+  const tick=()=>new Promise(r=>setTimeout(r));
+  const run=async enc=>{
+    const dec=new TextDecoder(enc,{fatal:enc==='utf-8'}),CH=8*1048576,out=[];
+    let sep=null,pend='',tail='',hd=null,hn=0,nrows=0,I={},fr=null;
+    const row=r=>{
+      if(r.length===1&&sep&&r[0].split(sep).length>=3)r=r[0].split(sep);
+      if(!hd){
+        const H=r.map(nm),a=col(H,'aic','codiceaic','codaic'),n=col(H,'denominazione','nomemedicinale','medicinale','nome','farmaco');
+        if(a>=0&&n>=0){hd=r;I={A:a,N:n,C:colx(H,'descrizione','confezione'),P:col(H,'principioattivo','principio','paassociati'),F:colx(H,'forma','formafarmaceutica'),G:col(H,'gtin','ean','codicebarre','barcode'),T:colx(H,'codiceatc','atc'),S:colx(H,'fornitura')};if(I.C===I.N)I.C=-1}
+        else if(!fr&&(fr=r),++hn>15)throw new Error('Non riconosco le colonne di codice AIC e denominazione. Prima riga del file: '+fr.join(' | ').slice(0,400)+'. Mandami questa riga e adatto la lettura.');
+        return;
+      }
+      nrows++;
+      const g=i=>i>=0?(r[i]||'').trim():'';
+      let aic=g(I.A).replace(/\D/g,'');if(aic.length>=7&&aic.length<9)aic=aic.padStart(9,'0');
+      const nome=[g(I.N),g(I.C)].filter(Boolean).join(' – ');
       if(!aic||!nome)return;
-      out.push({aic,nome,principio:g(r,iP),forma:g(r,iF),gtin:g(r,iG).replace(/\D/g,'')});
-    });
-    if(!out.length)throw new Error('Nessuna riga utilizzabile. Colonne trovate: '+hd.join(' | ').slice(0,400)+'.');
+      const o={aic,nome,principio:g(I.P),forma:g(I.F)},gt=g(I.G).replace(/\D/g,''),at=g(I.T);
+      if(gt)o.gtin=gt;if(at)o.atc=at;if(/ricalco/i.test(g(I.S)))o.sp=1;
+      out.push(o);
+    };
+    const lines=text=>{
+      const ls=text.split('\n');tail=ls.pop();
+      for(let l of ls){if(l.endsWith('\r'))l=l.slice(0,-1);pend=pend?pend+'\n'+l:l;
+        if(qn(pend)%2===0){const p=pend;pend='';if(p.trim())row(splitLine(p,sep))}}
+    };
+    for(let off=0;off<file.size;off+=CH){
+      let part=dec.decode(await file.slice(off,off+CH).arrayBuffer(),{stream:true});
+      if(sep===null){part=part.replace(/^\uFEFF/,'');const fl=part.split('\n',1)[0],cnt=x=>[';','\t',','].map(c=>[c,x.split(c).length]).sort((a,b)=>b[1]-a[1])[0];sep=(cnt(fl)[1]>2?cnt(fl):cnt(part.slice(0,4000)))[0]}
+      lines(tail+part);
+      msg('catMsg','Lettura '+Math.min(100,Math.round((off+CH)/file.size*100))+'% · '+out.length.toLocaleString('it-IT')+' farmaci trovati…','w');
+      await tick();
+    }
+    lines(tail+dec.decode()+'\n');
+    return {out,hd,I,nrows};
+  };
+  try{
+    const head=new Uint8Array(await file.slice(0,4).arrayBuffer());
+    if(head[0]===0x50&&head[1]===0x4B)throw new Error('Questo file è un foglio Excel (.xlsx), non un CSV. Aprilo in Excel e usa "Salva con nome" → "CSV (delimitato dal separatore di elenco)", poi caricalo qui.');
+    let enc='utf-8';if(head[0]===0xFF&&head[1]===0xFE)enc='utf-16le';else if(head[0]===0xFE&&head[1]===0xFF)enc='utf-16be';
+    let R;try{R=await run(enc)}catch(x){if(x&&x.name==='TypeError'&&enc==='utf-8')R=await run('windows-1252');else throw x}
+    if(!R.hd||!R.out.length)throw new Error('Nessuna riga utilizzabile'+(R.hd?'. Colonne trovate: '+R.hd.join(' | ').slice(0,400):'')+'.');
+    msg('catMsg','Salvataggio del catalogo nel browser…','w');await tick();
     let note='';
-    try{await Promise.race([idb('readwrite',s=>s.put(out,'cat')),new Promise((_,rj)=>setTimeout(()=>rj(new Error('timeout')),6000))])}
+    try{await Promise.race([idb('readwrite',s=>s.put(R.out,'cat')),new Promise((_,rj)=>setTimeout(()=>rj(new Error('timeout')),30000))])}
     catch(x){note=' ATTENZIONE: il browser non ha permesso di salvare il catalogo: resta disponibile solo finché non chiudi la pagina.'}
-    cat=out;catInfo();
-    msg('catMsg','Importate '+out.length.toLocaleString('it-IT')+' voci su '+(rows.length-1).toLocaleString('it-IT')+' righe. Colonne usate: AIC = "'+hd[iA]+'", nome = "'+hd[iN]+'"'+(iP>=0?', principio = "'+hd[iP]+'"':'')+'.'+note,note?'w':'ok');
+    cat=R.out;catInfo();
+    msg('catMsg','Importate '+R.out.length.toLocaleString('it-IT')+' confezioni su '+R.nrows.toLocaleString('it-IT')+' righe. Colonne usate: AIC = "'+R.hd[R.I.A]+'", nome = "'+R.hd[R.I.N]+'"'+(R.I.P>=0?', principio = "'+R.hd[R.I.P]+'"':'')+'.'+note,note?'w':'ok');
   }catch(err){msg('catMsg',err.message||'Impossibile leggere il file.','err')}
 };
 let resL=[],tmr;
@@ -510,7 +551,7 @@ $('aQ').oninput=()=>{clearTimeout(tmr);tmr=setTimeout(()=>{
 $('aRes').onclick=e=>{
   const i=e.target.dataset.i;if(i===undefined)return;const c=resL[+i];
   if(db.farmaci.some(f=>f.aic===c.aic)){msg('aMsg','Già presente in anagrafica.','err');return}
-  db.farmaci.push({id:uid(),aic:c.aic,gtin:c.gtin||'',nome:c.nome,principio:c.principio,forma:c.forma,min:0,stup:false,frigo:false,rischio:false,cat:true});
+  db.farmaci.push({id:uid(),aic:c.aic,gtin:c.gtin||'',nome:c.nome,principio:c.principio,forma:c.forma,min:0,stup:!!c.sp,frigo:false,rischio:false,cat:true});
   save();all();msg('aMsg','Aggiunto: '+c.nome+'. In tabella indica stupefacente/frigo/alto rischio e spunta "Da verificare".','ok');
 };
 
@@ -523,6 +564,7 @@ $('mCsv').onclick=()=>{
   const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
   dl('registro-movimenti-'+today()+'.csv','\ufeffdata;tipo;farmaco;aic;lotto;scadenza;quantita;dettaglio;operatore\n'+db.mov.map(x=>{const f=fd(x.fid)||{};return[x.ts,x.tipo,f.nome,f.aic,x.lotto,x.scad,x.qty,x.note,x.op].map(q).join(';')}).join('\n'),'text/csv');
 };
+document.addEventListener('keydown',e=>{const m={F2:'carico',F3:'scarico'}[e.key];if(m){e.preventDefault();document.querySelector('nav button[data-t="'+m+'"]').click()}});
 all();
 </script>
 <script>
